@@ -1,0 +1,155 @@
+/* ===========================
+   ZanGID — Стили истории чатов
+   =========================== */
+
+.history-header {
+  background-color: var(--bg-secondary);
+  padding: 40px 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.history-header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.history-header h1 {
+  font-size: 1.75rem;
+}
+
+.history-search {
+  display: flex;
+  align-items: center;
+  background-color: var(--input-bg);
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  min-width: 300px;
+  transition: border-color 0.2s;
+}
+
+.history-search:focus-within {
+  border-color: var(--accent);
+}
+
+.history-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 4px 0;
+  margin-left: 8px;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+}
+
+.history-search input:focus {
+  outline: none;
+}
+
+.history-content {
+  max-width: 960px;
+  margin: 40px auto 80px;
+  padding: 0 20px;
+}
+
+.history-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.history-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.timeline-group-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.timeline-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s;
+}
+
+.timeline-item:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
+  transform: translateX(4px);
+}
+
+.timeline-info h3 {
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.timeline-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.timeline-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.timeline-action {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.timeline-item:hover .timeline-action {
+  background-color: var(--accent-light);
+  color: var(--accent-text);
+}
+
+@media (max-width: 768px) {
+  .history-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .history-search {
+    width: 100%;
+    min-width: 0;
+  }
+}

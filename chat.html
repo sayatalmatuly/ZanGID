@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ZanGID — чат с AI-помощником по законодательству Казахстана.">
+  <title>Чат — ZanGID</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/chat.css">
+</head>
+<body>
+
+  <!-- Навбар чата -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">
+        <div class="navbar-logo-icon">
+          <svg viewBox="0 0 64 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="26" y="1" width="12" height="8" rx="2" stroke-width="2.5"/>
+              <line x1="27" y1="3.5" x2="37" y2="3.5" stroke-width="1.2"/>
+              <line x1="27" y1="6" x2="37" y2="6" stroke-width="1.2"/>
+              <path d="M29 9 Q29 16 32 16 Q35 16 35 9" stroke-width="2" fill="none"/>
+              <circle cx="32" cy="46" r="28" stroke-width="2.5"/>
+              <circle cx="32" cy="46" r="21" stroke-width="1.8"/>
+              <g transform="rotate(45, 32, 46)">
+                <path d="M32 32 L39 46 L32 60 L25 46 Z" stroke-width="1.8" fill="none"/>
+              </g>
+              <circle cx="32" cy="46" r="2.5" fill="currentColor" stroke="none"/>
+              <line x1="32" y1="18" x2="32" y2="25" stroke-width="2"/>
+              <line x1="32" y1="67" x2="32" y2="74" stroke-width="2"/>
+              <line x1="4" y1="46" x2="11" y2="46" stroke-width="2"/>
+              <line x1="53" y1="46" x2="60" y2="46" stroke-width="2"/>
+            </g>
+          </svg>
+        </div>
+        ZanGID
+      </a>
+
+      <div class="navbar-actions">
+        <a href="login.html" class="btn btn-outline auth-guest" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Войти</a>
+        <!-- Пользовательское меню -->
+        <div class="user-menu auth-user">
+          <button class="user-menu-btn" id="userMenuBtn">
+            <div class="user-avatar">АС</div>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name">Айдар Сейтов</div>
+              <div class="dropdown-email">aidar@example.com</div>
+            </div>
+            <a href="dashboard.html" class="dropdown-item">
+              <span class="dropdown-icon">📊</span> Панель управления
+            </a>
+            <a href="history.html" class="dropdown-item">
+              <span class="dropdown-icon">🕒</span> История чатов
+            </a>
+            <a href="profile.html" class="dropdown-item">
+              <span class="dropdown-icon">⚙️</span> Настройки
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="index.html" class="dropdown-item text-danger logout-btn">
+              <span class="dropdown-icon">🚪</span> Выйти
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Layout чата -->
+  <div class="chat-layout">
+
+    <!-- Сайдбар -->
+    <aside class="chat-sidebar" id="chatSidebar">
+      <div class="sidebar-header">
+        <button class="btn btn-primary" id="newChatBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Новый чат
+        </button>
+      </div>
+
+      <div class="sidebar-list" id="sidebarList">
+        <div class="sidebar-label">Сегодня</div>
+        <div class="sidebar-item active" data-chat="1">
+          <span class="sidebar-item-icon">💬</span>
+          <span class="sidebar-item-text">Как открыть ИП в Казахстане</span>
+        </div>
+        <div class="sidebar-item" data-chat="2">
+          <span class="sidebar-item-icon">💬</span>
+          <span class="sidebar-item-text">Права при увольнении</span>
+        </div>
+
+        <div class="sidebar-label">Вчера</div>
+        <div class="sidebar-item" data-chat="3">
+          <span class="sidebar-item-icon">💬</span>
+          <span class="sidebar-item-text">Регистрация ТОО</span>
+        </div>
+        <div class="sidebar-item" data-chat="4">
+          <span class="sidebar-item-icon">💬</span>
+          <span class="sidebar-item-text">Алименты порядок взыскания</span>
+        </div>
+      </div>
+
+      <!-- TODO: Supabase - загрузить историю чатов -->
+    </aside>
+
+    <!-- Основная область чата -->
+    <main class="chat-main">
+      <!-- Заголовок чата -->
+      <div class="chat-header">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Открыть сайдбар">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <h2 class="chat-header-title" id="chatTitle">Как открыть ИП в Казахстане</h2>
+        </div>
+      </div>
+
+      <!-- Сообщения -->
+      <div class="chat-messages" id="chatMessages">
+
+        <!-- Сообщение пользователя -->
+        <div class="message user">
+          <div class="message-avatar">А</div>
+          <div class="message-bubble">
+            Как открыть ИП в Казахстане? Какие документы нужны и сколько это стоит?
+          </div>
+        </div>
+
+        <!-- Ответ бота -->
+        <div class="message bot">
+          <div class="message-avatar">ZG</div>
+          <div class="message-bubble">
+            <div>Вот пошаговая инструкция по открытию ИП в Казахстане:</div>
+
+            <div class="bot-step">
+              <span class="bot-step-number">1</span>
+              <span class="bot-step-text">Определите вид деятельности по классификатору ОКЭД. Это важно для правильной регистрации и выбора налогового режима.</span>
+            </div>
+
+            <div class="bot-step">
+              <span class="bot-step-number">2</span>
+              <span class="bot-step-text">Зарегистрируйтесь на портале eGov.kz или через приложение eGov mobile. Вам понадобится ЭЦП (электронная цифровая подпись).</span>
+            </div>
+
+            <div class="bot-step">
+              <span class="bot-step-number">3</span>
+              <span class="bot-step-text">Подайте уведомление о начале деятельности в качестве ИП. Регистрация бесплатная и занимает 1 рабочий день.</span>
+            </div>
+
+            <div class="bot-step">
+              <span class="bot-step-number">4</span>
+              <span class="bot-step-text">Выберите налоговый режим: упрощённая декларация (для оборота до 82 931 МРП) или патент (для определённых видов деятельности).</span>
+            </div>
+
+            <div class="bot-step">
+              <span class="bot-step-number">5</span>
+              <span class="bot-step-text">Откройте банковский счёт и зарегистрируйтесь в налоговых органах. После этого можно начинать работу.</span>
+            </div>
+
+            <div class="bot-pills">
+              <span class="pill doc">📄 Предпринимательский кодекс РК</span>
+              <span class="pill doc">📄 Налоговый кодекс, ст. 683</span>
+              <span class="pill link">🔗 egov.kz</span>
+              <span class="pill link">🔗 elicense.kz</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Второе сообщение пользователя -->
+        <div class="message user">
+          <div class="message-avatar">А</div>
+          <div class="message-bubble">
+            А какие налоги платит ИП на упрощёнке?
+          </div>
+        </div>
+
+        <!-- Второй ответ бота -->
+        <div class="message bot">
+          <div class="message-avatar">ZG</div>
+          <div class="message-bubble">
+            <div>Налоговый режим «Упрощённая декларация» предполагает следующие платежи:</div>
+
+            <div class="bot-step">
+              <span class="bot-step-number">1</span>
+              <span class="bot-step-text"><strong>Налоговая ставка — 3%</strong> от дохода за полугодие. Из них 1,5% — ИПН (индивидуальный подоходный налог) и 1,5% — социальный налог.</span>
+            </div>
+
+            <div class="bot-step">
+              <span class="bot-step-number">2</span>
+              <span class="bot-step-text"><strong>Социальные отчисления</strong> — 3,5% от заявленного дохода (минимум 1 МЗП).</span>
+            </div>
+
+            <div class="bot-step">
+              <span class="bot-step-number">3</span>
+              <span class="bot-step-text"><strong>Пенсионные взносы</strong> — 10% от заявленного дохода. Обязательны для всех ИП.</span>
+            </div>
+
+            <div class="bot-pills">
+              <span class="pill doc">📄 Налоговый кодекс РК, глава 77</span>
+              <span class="pill link">🔗 kgd.gov.kz</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Поле ввода -->
+      <div class="chat-input-area">
+        <div class="chat-input-wrapper">
+          <input type="text" placeholder="Задайте вопрос о законах..." id="chatInput">
+          <button class="chat-send-btn" id="chatSendBtn" aria-label="Отправить">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/chat.js"></script>
+</body>
+</html>

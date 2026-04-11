@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Поддержка ZanGID — часто задаваемые вопросы и форма обратной связи.">
+  <title>Поддержка — ZanGID</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/support.css">
+</head>
+
+<body>
+
+  <!-- Навбар -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">
+        <div class="navbar-logo-icon">
+          <svg viewBox="0 0 64 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="26" y="1" width="12" height="8" rx="2" stroke-width="2.5"/>
+              <line x1="27" y1="3.5" x2="37" y2="3.5" stroke-width="1.2"/>
+              <line x1="27" y1="6" x2="37" y2="6" stroke-width="1.2"/>
+              <path d="M29 9 Q29 16 32 16 Q35 16 35 9" stroke-width="2" fill="none"/>
+              <circle cx="32" cy="46" r="28" stroke-width="2.5"/>
+              <circle cx="32" cy="46" r="21" stroke-width="1.8"/>
+              <g transform="rotate(45, 32, 46)">
+                <path d="M32 32 L39 46 L32 60 L25 46 Z" stroke-width="1.8" fill="none"/>
+              </g>
+              <circle cx="32" cy="46" r="2.5" fill="currentColor" stroke="none"/>
+              <line x1="32" y1="18" x2="32" y2="25" stroke-width="2"/>
+              <line x1="32" y1="67" x2="32" y2="74" stroke-width="2"/>
+              <line x1="4" y1="46" x2="11" y2="46" stroke-width="2"/>
+              <line x1="53" y1="46" x2="60" y2="46" stroke-width="2"/>
+            </g>
+          </svg>
+        </div>
+        ZanGID
+      </a>
+
+      <div class="navbar-nav" id="navbarNav">
+        <a href="about.html" class="navbar-link">О нас</a>
+        <a href="support.html" class="navbar-link active">Поддержка</a>
+      </div>
+
+      <div class="navbar-actions">
+        <a href="login.html" class="btn btn-outline auth-guest" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Войти</a>
+        <a href="chat.html" class="btn btn-primary auth-user" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Новый чат</a>
+        <!-- Пользовательское меню -->
+        <div class="user-menu auth-user">
+          <button class="user-menu-btn" id="userMenuBtn">
+            <div class="user-avatar">АС</div>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name">Айдар Сейтов</div>
+              <div class="dropdown-email">aidar@example.com</div>
+            </div>
+            <a href="dashboard.html" class="dropdown-item">
+              <span class="dropdown-icon">📊</span> Панель управления
+            </a>
+            <a href="history.html" class="dropdown-item">
+              <span class="dropdown-icon">🕒</span> История чатов
+            </a>
+            <a href="profile.html" class="dropdown-item">
+              <span class="dropdown-icon">⚙️</span> Настройки
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="index.html" class="dropdown-item text-danger logout-btn">
+              <span class="dropdown-icon">🚪</span> Выйти
+            </a>
+          </div>
+        </div>
+        <button class="burger-btn" id="burgerBtn" aria-label="Меню">
+          <div class="burger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Мобильное меню -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="about.html" class="navbar-link">О нас</a>
+    <a href="support.html" class="navbar-link active">Поддержка</a>
+    <a href="login.html" class="btn btn-primary">Войти</a>
+  </div>
+
+  <!-- Шапка -->
+  <section class="support-hero">
+    <h1>Поддержка</h1>
+    <p>Ответы на частые вопросы и обратная связь</p>
+  </section>
+
+  <!-- Контент -->
+  <div class="support-content">
+
+    <!-- FAQ -->
+    <section class="faq-section">
+      <h2>Часто задаваемые вопросы</h2>
+
+      <div class="faq-item open" id="faq1">
+        <button class="faq-question">
+          Что такое ZanGID?
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          ZanGID — это AI-навигатор по законодательству Республики Казахстан. Вы задаёте вопрос на простом языке,
+          а система анализирует актуальные законы и формирует понятный пошаговый ответ со ссылками на конкретные
+          нормативные акты.
+        </div>
+      </div>
+
+      <div class="faq-item" id="faq2">
+        <button class="faq-question">
+          ZanGID заменяет юриста?
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          Нет. ZanGID — это информационный инструмент, который помогает разобраться в общих вопросах
+          законодательства. Для решения конкретных юридических задач рекомендуем обращаться к квалифицированному юристу.
+        </div>
+      </div>
+
+      <div class="faq-item" id="faq3">
+        <button class="faq-question">
+          Актуальна ли информация?
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          Мы стараемся использовать актуальную базу законодательства Казахстана. Однако законы регулярно
+          обновляются, поэтому для важных решений рекомендуем проверять информацию на официальных ресурсах:
+          adilet.zan.kz и egov.kz.
+        </div>
+      </div>
+
+      <div class="faq-item" id="faq4">
+        <button class="faq-question">
+          Сервис бесплатный?
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          Да, весь функционал ZanGID полностью бесплатный. Вы можете задавать вопросы и получать ответы
+          без ограничений.
+        </div>
+      </div>
+
+      <div class="faq-item" id="faq5">
+        <button class="faq-question">
+          На каких языках работает ZanGID?
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          На данный момент ZanGID работает на русском языке. Поддержка казахского языка (қазақша)
+          находится в разработке и будет добавлена в ближайших обновлениях.
+        </div>
+      </div>
+
+      <div class="faq-item" id="faq6">
+        <button class="faq-question">
+          Как сохранить историю запросов?
+          <span class="faq-arrow">▼</span>
+        </button>
+        <div class="faq-answer">
+          Зарегистрируйтесь в системе — и все ваши чаты будут автоматически сохраняться.
+          Вы сможете вернуться к ним в любое время через боковую панель в разделе «Чат».
+        </div>
+      </div>
+    </section>
+
+    <!-- Форма обратной связи -->
+    <section class="contact-section">
+      <h2>Обратная связь</h2>
+
+      <form class="contact-form" id="contactForm">
+        <div class="form-group">
+          <label class="form-label" for="contactName">Имя</label>
+          <input type="text" class="form-input" id="contactName" placeholder="Ваше имя" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="contactEmail">Email</label>
+          <input type="email" class="form-input" id="contactEmail" placeholder="example@mail.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="contactMessage">Сообщение</label>
+          <textarea class="form-input" id="contactMessage" placeholder="Опишите ваш вопрос или предложение..."
+            required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Отправить</button>
+      </form>
+
+      <!-- Контактный email -->
+      <div class="contact-email">
+        <p>Или напишите нам на <a href="mailto:support@zangid.kz">support@zangid.kz</a></p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Футер -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-copy">© 2025 ZanGID. Все права защищены.</span>
+      <div class="footer-links">
+        <a href="about.html">О нас</a>
+        <a href="support.html">Поддержка</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/support.js"></script>
+</body>
+
+</html>

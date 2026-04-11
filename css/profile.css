@@ -1,0 +1,192 @@
+/* ===========================
+   ZanGID — Стили профиля
+   =========================== */
+
+/* --- Шапка профиля --- */
+.profile-header {
+  background-color: var(--accent-dark);
+  padding: 48px 20px 60px;
+  text-align: center;
+}
+
+.profile-header h1 {
+  color: #FFFFFF;
+  font-size: 1.75rem;
+  margin-bottom: 4px;
+}
+
+.profile-header p {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9375rem;
+}
+
+/* --- Контент профиля --- */
+.profile-content {
+  max-width: 640px;
+  margin: -36px auto 0;
+  padding: 0 20px 60px;
+}
+
+/* --- Карточка пользователя --- */
+.profile-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 32px 28px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  background-color: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 1.375rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.profile-info h2 {
+  font-size: 1.25rem;
+  margin-bottom: 4px;
+}
+
+.profile-info p {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 20px;
+}
+
+.profile-stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.profile-stat-value {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* --- Блок настроек --- */
+.settings-section {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+.settings-title {
+  padding: 20px 28px 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px;
+  border-top: 1px solid var(--border-color);
+  gap: 16px;
+}
+
+.settings-item:first-of-type {
+  border-top: none;
+}
+
+.settings-item-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-item-label span:first-child {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.settings-item-label span:last-child {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* Select внутри настроек */
+.settings-select {
+  padding: 8px 12px;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-family: inherit;
+  cursor: pointer;
+  min-width: 140px;
+  transition: border-color 0.15s;
+}
+
+.settings-select:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+/* --- Кнопка выхода --- */
+.logout-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: transparent;
+  color: var(--danger);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  border: 1.5px solid var(--danger);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.logout-btn:hover {
+  background-color: var(--danger);
+  color: #FFFFFF;
+}
+
+/* --- Адаптивность --- */
+@media (max-width: 768px) {
+  .profile-card {
+    flex-direction: column;
+    text-align: center;
+    padding: 28px 24px;
+  }
+
+  .profile-stats {
+    justify-content: center;
+  }
+
+  .settings-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .settings-select {
+    width: 100%;
+  }
+}

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="О проекте ZanGID — AI-навигатор по законодательству Казахстана. Наша миссия и принципы работы.">
+  <title>О нас — ZanGID</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/about.css">
+</head>
+<body>
+
+  <!-- Навбар -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">
+        <div class="navbar-logo-icon">
+          <svg viewBox="0 0 64 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="26" y="1" width="12" height="8" rx="2" stroke-width="2.5"/>
+              <line x1="27" y1="3.5" x2="37" y2="3.5" stroke-width="1.2"/>
+              <line x1="27" y1="6" x2="37" y2="6" stroke-width="1.2"/>
+              <path d="M29 9 Q29 16 32 16 Q35 16 35 9" stroke-width="2" fill="none"/>
+              <circle cx="32" cy="46" r="28" stroke-width="2.5"/>
+              <circle cx="32" cy="46" r="21" stroke-width="1.8"/>
+              <g transform="rotate(45, 32, 46)">
+                <path d="M32 32 L39 46 L32 60 L25 46 Z" stroke-width="1.8" fill="none"/>
+              </g>
+              <circle cx="32" cy="46" r="2.5" fill="currentColor" stroke="none"/>
+              <line x1="32" y1="18" x2="32" y2="25" stroke-width="2"/>
+              <line x1="32" y1="67" x2="32" y2="74" stroke-width="2"/>
+              <line x1="4" y1="46" x2="11" y2="46" stroke-width="2"/>
+              <line x1="53" y1="46" x2="60" y2="46" stroke-width="2"/>
+            </g>
+          </svg>
+        </div>
+        ZanGID
+      </a>
+
+      <div class="navbar-nav" id="navbarNav">
+        <a href="about.html" class="navbar-link active">О нас</a>
+        <a href="support.html" class="navbar-link">Поддержка</a>
+      </div>
+
+      <div class="navbar-actions">
+        <a href="login.html" class="btn btn-outline auth-guest" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Войти</a>
+        <a href="chat.html" class="btn btn-primary auth-user" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill); display: none;" id="navChatBtn">Новый чат</a>
+        <!-- Пользовательское меню -->
+        <div class="user-menu auth-user">
+          <button class="user-menu-btn" id="userMenuBtn">
+            <div class="user-avatar">АС</div>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name">Айдар Сейтов</div>
+              <div class="dropdown-email">aidar@example.com</div>
+            </div>
+            <a href="dashboard.html" class="dropdown-item">
+              <span class="dropdown-icon">📊</span> Панель управления
+            </a>
+            <a href="history.html" class="dropdown-item">
+              <span class="dropdown-icon">🕒</span> История чатов
+            </a>
+            <a href="profile.html" class="dropdown-item">
+              <span class="dropdown-icon">⚙️</span> Настройки
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="index.html" class="dropdown-item text-danger logout-btn">
+              <span class="dropdown-icon">🚪</span> Выйти
+            </a>
+          </div>
+        </div>
+        <button class="burger-btn" id="burgerBtn" aria-label="Меню">
+          <div class="burger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Мобильное меню -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="about.html" class="navbar-link active">О нас</a>
+    <a href="support.html" class="navbar-link">Поддержка</a>
+    <a href="login.html" class="btn btn-primary">Войти</a>
+  </div>
+
+  <!-- Шапка -->
+  <section class="about-hero">
+    <h1>О проекте ZanGID</h1>
+    <p>Делаем законы Казахстана понятными для каждого</p>
+  </section>
+
+  <!-- Миссия -->
+  <section class="section mission-section">
+    <div class="container">
+      <div class="mission-content">
+        <h2>Наша миссия</h2>
+        <p>
+          ZanGID создан, чтобы преодолеть барьер между сложным юридическим языком законов и повседневными 
+          потребностями граждан Казахстана. Мы используем искусственный интеллект для анализа законодательства 
+          и предоставления чётких, пошаговых инструкций на понятном языке.
+        </p>
+        <p style="margin-top: 16px;">
+          Каждый человек имеет право понимать законы, которые регулируют его жизнь. Наша цель — сделать 
+          правовую информацию доступной для всех, независимо от юридической подготовки.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Как это работает -->
+  <section class="about-steps">
+    <div class="container">
+      <h2 class="section-title" style="text-align: center;">Как это работает</h2>
+      <p class="section-subtitle" style="text-align: center;">Три шага к ясности</p>
+
+      <div class="about-steps-grid">
+        <div class="about-step">
+          <div class="about-step-icon">❓</div>
+          <h3>Задайте вопрос</h3>
+          <p>Опишите ситуацию своими словами — как в поисковике или мессенджере</p>
+        </div>
+
+        <div class="about-step">
+          <div class="about-step-icon">🤖</div>
+          <h3>ИИ находит ответ</h3>
+          <p>Система анализирует актуальное законодательство РК и формирует понятный ответ</p>
+        </div>
+
+        <div class="about-step">
+          <div class="about-step-icon">📋</div>
+          <h3>Понятная инструкция</h3>
+          <p>Получите пошаговый план действий со ссылками на конкретные статьи и документы</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Дисклеймер -->
+  <section class="disclaimer">
+    <div class="container">
+      <div class="disclaimer-card">
+        <div class="disclaimer-icon">⚠️</div>
+        <h3>Важное уведомление</h3>
+        <p>
+          ZanGID — это информационный инструмент, а не юридическая консультация. 
+          Предоставленная информация носит справочный характер и не заменяет консультацию 
+          квалифицированного юриста. Для принятия важных юридических решений рекомендуем 
+          обратиться к профессионалу.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Футер -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-copy">© 2025 ZanGID. Все права защищены.</span>
+      <div class="footer-links">
+        <a href="about.html">О нас</a>
+        <a href="support.html">Поддержка</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/about.js"></script>
+</body>
+</html>
