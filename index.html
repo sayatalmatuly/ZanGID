@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="ZanGID — AI-навигатор по законодательству Казахстана. Получите ответы на юридические вопросы простым языком.">
+  <title>ZanGID — AI-навигатор по законодательству</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/index.css">
+</head>
+
+<body>
+
+  <!-- Навбар -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-inner">
+      <a href="index.html" class="navbar-logo">
+        <div class="navbar-logo-icon">
+          <svg viewBox="0 0 64 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="26" y="1" width="12" height="8" rx="2" stroke-width="2.5"/>
+              <line x1="27" y1="3.5" x2="37" y2="3.5" stroke-width="1.2"/>
+              <line x1="27" y1="6" x2="37" y2="6" stroke-width="1.2"/>
+              <path d="M29 9 Q29 16 32 16 Q35 16 35 9" stroke-width="2" fill="none"/>
+              <circle cx="32" cy="46" r="28" stroke-width="2.5"/>
+              <circle cx="32" cy="46" r="21" stroke-width="1.8"/>
+              <g transform="rotate(45, 32, 46)">
+                <path d="M32 32 L39 46 L32 60 L25 46 Z" stroke-width="1.8" fill="none"/>
+              </g>
+              <circle cx="32" cy="46" r="2.5" fill="currentColor" stroke="none"/>
+              <line x1="32" y1="18" x2="32" y2="25" stroke-width="2"/>
+              <line x1="32" y1="67" x2="32" y2="74" stroke-width="2"/>
+              <line x1="4" y1="46" x2="11" y2="46" stroke-width="2"/>
+              <line x1="53" y1="46" x2="60" y2="46" stroke-width="2"/>
+            </g>
+          </svg>
+        </div>
+        ZanGID
+      </a>
+
+      <div class="navbar-nav" id="navbarNav">
+        <a href="about.html" class="navbar-link">О нас</a>
+        <a href="support.html" class="navbar-link">Поддержка</a>
+      </div>
+
+      <div class="navbar-actions">
+        <a href="login.html" class="btn btn-outline auth-guest" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Войти</a>
+        <a href="chat.html" class="btn btn-primary auth-user" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Новый чат</a>
+        <!-- Пользовательское меню -->
+        <div class="user-menu auth-user">
+          <button class="user-menu-btn" id="userMenuBtn">
+            <div class="user-avatar">АС</div>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-name">Айдар Сейтов</div>
+              <div class="dropdown-email">aidar@example.com</div>
+            </div>
+            <a href="dashboard.html" class="dropdown-item">
+              <span class="dropdown-icon">📊</span> Панель управления
+            </a>
+            <a href="history.html" class="dropdown-item">
+              <span class="dropdown-icon">🕒</span> История чатов
+            </a>
+            <a href="profile.html" class="dropdown-item">
+              <span class="dropdown-icon">⚙️</span> Настройки
+            </a>
+            <div class="dropdown-divider"></div>
+            <a href="index.html" class="dropdown-item text-danger logout-btn">
+              <span class="dropdown-icon">🚪</span> Выйти
+            </a>
+          </div>
+        </div>
+        <button class="burger-btn" id="burgerBtn" aria-label="Меню">
+          <div class="burger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Мобильное меню -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="about.html" class="navbar-link">О нас</a>
+    <a href="support.html" class="navbar-link">Поддержка</a>
+    <a href="login.html" class="btn btn-primary">Войти</a>
+  </div>
+
+  <!-- Hero секция -->
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        AI-навигатор
+      </div>
+      <h1>Разберитесь в законах Казахстана за минуту</h1>
+      <p>Задайте вопрос — получите пошаговую инструкцию со ссылками на законы, простым и понятным языком</p>
+
+      <form class="hero-search" id="heroSearch">
+        <div class="hero-search-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </div>
+        <input type="text" placeholder="Как открыть ИП в Казахстане?" id="heroSearchInput">
+        <button type="submit" class="btn btn-primary">Найти ответ</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Популярные запросы -->
+  <section class="section popular">
+    <div class="container">
+      <div class="popular-label">Популярные запросы</div>
+      <div class="popular-chips" id="popularChips">
+        <span class="chip" data-query="Как открыть ИП?">🏢 Как открыть ИП?</span>
+        <span class="chip" data-query="Права арендатора">🏠 Права арендатора</span>
+        <span class="chip" data-query="Увольнение по собственному">💼 Увольнение по собственному</span>
+        <span class="chip" data-query="Алименты на ребёнка">👨‍👩‍👧 Алименты на ребёнка</span>
+        <span class="chip" data-query="Возврат товара">🛒 Возврат товара</span>
+        <span class="chip" data-query="Регистрация ТОО">📋 Регистрация ТОО</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Категории -->
+  <section class="section categories">
+    <div class="container">
+      <h2 class="section-title">Категории</h2>
+      <p class="section-subtitle">Выберите тему, чтобы найти пошаговые инструкции</p>
+
+      <div class="categories-grid">
+        <a href="chat.html" class="category-card" id="categoryProperty">
+          <div class="category-icon green">🏠</div>
+          <h3>Недвижимость</h3>
+          <span class="category-count">24 инструкции</span>
+        </a>
+
+        <a href="chat.html" class="category-card" id="categoryBusiness">
+          <div class="category-icon blue">💼</div>
+          <h3>Бизнес</h3>
+          <span class="category-count">31 инструкция</span>
+        </a>
+
+        <a href="chat.html" class="category-card" id="categoryLabor">
+          <div class="category-icon orange">⚖️</div>
+          <h3>Трудовые споры</h3>
+          <span class="category-count">18 инструкций</span>
+        </a>
+
+        <a href="chat.html" class="category-card" id="categoryUtilities">
+          <div class="category-icon purple">🏢</div>
+          <h3>ЖКХ</h3>
+          <span class="category-count">15 инструкций</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Как это работает -->
+  <section class="how-it-works">
+    <div class="container">
+      <h2 class="section-title" style="text-align: center;">Как это работает</h2>
+      <p class="section-subtitle" style="text-align: center;">Три простых шага к ответу</p>
+
+      <div class="steps-grid">
+        <div class="step-card">
+          <div class="step-number">1</div>
+          <h3>Задайте вопрос</h3>
+          <p>Опишите ситуацию своими словами — как будто спрашиваете у друга-юриста</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">2</div>
+          <h3>ИИ анализирует</h3>
+          <p>Система находит релевантные статьи законов и формирует пошаговый ответ</p>
+        </div>
+        <div class="step-card">
+          <div class="step-number">3</div>
+          <h3>Получите инструкцию</h3>
+          <p>Чёткий план действий со ссылками на законы и необходимые документы</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="section cta-section">
+    <div class="container">
+      <h2>Готовы разобраться в законах?</h2>
+      <p>Начните прямо сейчас — это бесплатно</p>
+      <a href="chat.html" class="btn btn-primary">Задать вопрос</a>
+    </div>
+  </section>
+
+  <!-- Футер -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-copy">© 2025 ZanGID. Все права защищены.</span>
+      <div class="footer-links">
+        <a href="about.html">О нас</a>
+        <a href="support.html">Поддержка</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+  <script src="js/index.js"></script>
+</body>
+
+</html>
