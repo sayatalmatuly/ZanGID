@@ -408,14 +408,31 @@
       chatTitle.textContent = 'Новый чат';
     }
 
-    // Параметр из формы на главной
+    // Параметры URL: открыть чат из истории или вопрос с главной
     const urlParams = new URLSearchParams(window.location.search);
+    const openChatId = urlParams.get('id') || urlParams.get('chat_id');
     const queryParam = urlParams.get('q');
-    if (queryParam) {
+
+    if (openChatId) {
+      try {
+        const { data: chatRow, error: openErr } = await window.supabaseClient
+          .from('chats')
+          .select('title')
+          .eq('id', openChatId)
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (!openErr && chatRow) {
+          await loadChatMessages(openChatId, chatRow.title);
+        }
+      } catch (e) {
+        console.error('Ошибка открытия чата по ссылке:', e);
+      }
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (queryParam) {
       chatInput.value = queryParam;
       setTimeout(() => sendMessage(), 300);
       window.history.replaceState({}, document.title, window.location.pathname);
-    } else {
+    } else if (!currentChatId) {
       chatMessages.innerHTML = `
         <div style="display:flex; justify-content:center; align-items:center; height:100%; color:var(--text-muted);">
           Напишите ваш вопрос, чтобы начать новый чат

@@ -114,80 +114,8 @@
       <span class="chip">Трудовые споры</span>
     </div>
 
-    <div class="history-timeline">
-      <div class="timeline-group">
-        <div class="timeline-group-title">На этой неделе</div>
-        <div class="timeline-items">
-          <a href="chat.html" class="timeline-item">
-            <div class="timeline-info">
-              <h3>Как уволиться по собственному желанию?</h3>
-              <div class="timeline-meta">
-                <span class="timeline-meta-item">💼 Трудовой кодекс</span>
-                <span class="timeline-meta-item">💬 4 сообщения</span>
-                <span class="timeline-meta-item">🕒 Вчера</span>
-              </div>
-            </div>
-            <div class="timeline-action">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </div>
-          </a>
-          
-          <a href="chat.html" class="timeline-item">
-            <div class="timeline-info">
-              <h3>Процедура регистрации ТОО</h3>
-              <div class="timeline-meta">
-                <span class="timeline-meta-item">🏢 Предпринимательство</span>
-                <span class="timeline-meta-item">💬 8 сообщений</span>
-                <span class="timeline-meta-item">🕒 Вторник</span>
-              </div>
-            </div>
-            <div class="timeline-action">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      <div class="timeline-group">
-        <div class="timeline-group-title">В прошлом месяце</div>
-        <div class="timeline-items">
-          <a href="chat.html" class="timeline-item">
-            <div class="timeline-info">
-              <h3>Договор аренды квартиры: нюансы</h3>
-              <div class="timeline-meta">
-                <span class="timeline-meta-item">🏠 Недвижимость</span>
-                <span class="timeline-meta-item">💬 12 сообщений</span>
-                <span class="timeline-meta-item">🕒 14 Марта</span>
-              </div>
-            </div>
-            <div class="timeline-action">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </div>
-          </a>
-          
-          <a href="chat.html" class="timeline-item">
-            <div class="timeline-info">
-              <h3>Налоговые проверки: права ИП</h3>
-              <div class="timeline-meta">
-                <span class="timeline-meta-item">📋 Налоги</span>
-                <span class="timeline-meta-item">💬 6 сообщений</span>
-                <span class="timeline-meta-item">🕒 02 Марта</span>
-              </div>
-            </div>
-            <div class="timeline-action">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </div>
-          </a>
-        </div>
-      </div>
+    <div class="history-timeline" id="historyTimeline">
+      <div class="history-loading" id="historyLoading">Загрузка…</div>
     </div>
   </div>
 
@@ -203,6 +131,7 @@
   </footer>
 
   <script src="js/app.js"></script>
+  <script src="js/history.js"></script>
 </body>
 
 </html>
