@@ -19,6 +19,11 @@
   color: #FFFFFF;
 }
 
+.dashboard-header h1.user-identity-pending {
+  color: rgba(255, 255, 255, 0.55);
+  font-weight: 500;
+}
+
 .dashboard-header p {
   color: rgba(255, 255, 255, 0.8);
   font-size: 1.0625rem;

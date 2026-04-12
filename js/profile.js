@@ -23,15 +23,25 @@
     const profileAvatar = document.getElementById('profileAvatar');
     const profileCity = document.getElementById('profileCity');
     const statQueries = document.getElementById('statQueries');
-    const statDocs = document.getElementById('statDocs');
+    const statTopics = document.getElementById('statTopics');
 
     try {
       // 1. Загрузка профиля из users
       let { data: profile, error } = await window.supabaseClient.from('users').select('*').eq('id', user.id).single();
       
       const fullName = profile?.name || user.user_metadata?.fullname || user.email.split('@')[0];
-      if (profileName) profileName.textContent = fullName;
-      if (profileAvatar) profileAvatar.textContent = fullName.substring(0, 2).toUpperCase();
+      if (profileName) {
+        profileName.textContent = fullName;
+        profileName.classList.remove('user-identity-pending');
+      }
+      if (profileAvatar) {
+        profileAvatar.textContent = fullName.substring(0, 2).toUpperCase();
+        profileAvatar.classList.remove('user-identity-pending');
+      }
+      if (profileCity) {
+        profileCity.textContent = profile && profile.city ? '📍 ' + profile.city : 'Укажите город';
+        profileCity.classList.remove('user-identity-pending');
+      }
 
       if (!profile) {
         // Создаем профиль при первом входе, если его нет
@@ -44,25 +54,47 @@
       } else {
         if (settingCity && profile.city) settingCity.value = profile.city;
         if (settingLanguage && profile.language) settingLanguage.value = profile.language;
-        if (profileCity && profile.city) profileCity.textContent = '📍 ' + profile.city;
       }
 
       // 2. Статистика (чаты, сообщения)
       const { count: chatsCount } = await window.supabaseClient.from('chats').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
-      if (statQueries) statQueries.textContent = chatsCount || 0;
-      
-      if (statDocs) {
-        // Подсчет сообщений текущего пользователя
-        const { count: msgsCount } = await window.supabaseClient.from('messages').select('chats!inner(*)', { count: 'exact', head: true }).eq('chats.user_id', user.id);
-        statDocs.textContent = msgsCount || 0;
-        const statLabel = statDocs.parentElement.childNodes[2]; 
-        if (statLabel && statLabel.nodeType === 3) {
-          statLabel.textContent = ' сообщений';
-        }
+      if (statQueries) {
+        statQueries.textContent = chatsCount || 0;
+        statQueries.classList.remove('user-identity-pending');
+      }
+
+      if (statTopics) {
+        const { count: msgsCount } = await window.supabaseClient
+          .from('messages')
+          .select('chats!inner(*)', { count: 'exact', head: true })
+          .eq('chats.user_id', user.id);
+        statTopics.textContent = msgsCount || 0;
+        statTopics.classList.remove('user-identity-pending');
       }
 
     } catch (err) {
       console.error('Ошибка профиля:', err);
+      var fallbackName = user.email.split('@')[0];
+      if (profileName) {
+        profileName.textContent = fallbackName;
+        profileName.classList.remove('user-identity-pending');
+      }
+      if (profileAvatar) {
+        profileAvatar.textContent = fallbackName.substring(0, 2).toUpperCase();
+        profileAvatar.classList.remove('user-identity-pending');
+      }
+      if (profileCity) {
+        profileCity.textContent = 'Укажите город';
+        profileCity.classList.remove('user-identity-pending');
+      }
+      if (statQueries) {
+        statQueries.textContent = '—';
+        statQueries.classList.remove('user-identity-pending');
+      }
+      if (statTopics) {
+        statTopics.textContent = '—';
+        statTopics.classList.remove('user-identity-pending');
+      }
     }
 
     // Сохранение профиля

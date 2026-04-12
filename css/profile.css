@@ -54,6 +54,11 @@
   flex-shrink: 0;
 }
 
+.profile-avatar.user-identity-pending {
+  background-color: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+
 .profile-info h2 {
   font-size: 1.25rem;
   margin-bottom: 4px;

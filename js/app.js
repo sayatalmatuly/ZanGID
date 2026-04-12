@@ -123,10 +123,17 @@
         userFullname = session.user.user_metadata?.fullname || session.user.user_metadata?.full_name || email.split('@')[0];
       }
       
-      document.querySelectorAll('.dropdown-name').forEach(el => el.textContent = userFullname);
-      document.querySelectorAll('.dropdown-email').forEach(el => el.textContent = email);
-      document.querySelectorAll('.user-avatar').forEach(el => {
+      document.querySelectorAll('.dropdown-name').forEach(function (el) {
+        el.textContent = userFullname;
+        el.classList.remove('user-identity-pending');
+      });
+      document.querySelectorAll('.dropdown-email').forEach(function (el) {
+        el.textContent = email;
+        el.classList.remove('user-identity-pending');
+      });
+      document.querySelectorAll('.user-avatar').forEach(function (el) {
         el.textContent = userFullname.substring(0, 2).toUpperCase();
+        el.classList.remove('user-identity-pending');
       });
     } else {
       document.body.classList.remove('logged-in');

@@ -43,6 +43,7 @@
 
       if (dashboardGreeting) {
         dashboardGreeting.textContent = `С возвращением, ${userFullName}! 👋`;
+        dashboardGreeting.classList.remove('user-identity-pending');
       }
 
       if (!profile || !profile.name) {
@@ -131,6 +132,10 @@
 
     } catch (err) {
       console.error('Ошибка дашборда:', err);
+      if (dashboardGreeting) {
+        dashboardGreeting.textContent = 'С возвращением! 👋';
+        dashboardGreeting.classList.remove('user-identity-pending');
+      }
     }
 
     // --- Onboarding Logic ---
@@ -181,8 +186,14 @@
         if (dashboardGreeting) {
           dashboardGreeting.textContent = `С возвращением, ${name}! 👋`;
         }
-        document.querySelectorAll('.dropdown-name').forEach(el => el.textContent = name);
-        document.querySelectorAll('.user-avatar').forEach(el => el.textContent = name.substring(0, 2).toUpperCase());
+        document.querySelectorAll('.dropdown-name').forEach(function (el) {
+          el.textContent = name;
+          el.classList.remove('user-identity-pending');
+        });
+        document.querySelectorAll('.user-avatar').forEach(function (el) {
+          el.textContent = name.substring(0, 2).toUpperCase();
+          el.classList.remove('user-identity-pending');
+        });
         
       } catch (err) {
         console.error('Ошибка сохранения профиля:', err);
