@@ -213,3 +213,51 @@
     align-self: flex-end;
   }
 }
+
+/* Onboarding Popup Styles */
+  .onboarding-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .onboarding-overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+  .onboarding-card {
+    background: var(--bg-card, #fff);
+    border-radius: var(--radius-lg, 12px);
+    width: 90%;
+    max-width: 400px;
+    padding: 32px;
+    box-shadow: var(--shadow-xl);
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+  }
+  .onboarding-overlay.show .onboarding-card {
+    transform: translateY(0);
+  }
+  .city-chip {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-pill);
+    background: var(--bg-component);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+  }
+  .city-chip:hover {
+    background: var(--bg-hover);
+  }
+  .city-chip.active {
+    background: #10b981;
+    color: #fff;
+    border-color: #10b981;
+  }

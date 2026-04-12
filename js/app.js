@@ -91,29 +91,88 @@
     });
   }
 
-  // --- Имитация авторизации (Frontend Mock) ---
-  function initAuthState() {
-    const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+  // --- Интеграция Supabase Auth ---
+  async function initAuthState() {
+    if (!window.supabaseClient) return;
+
+    // Получаем текущую сессию
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+    const isLoggedIn = !!session;
+
     if (isLoggedIn) {
       document.body.classList.add('logged-in');
+      
+      const email = session.user.email;
+      let userFullname = '';
+      
+      try {
+        const { data: profile, error } = await window.supabaseClient
+          .from('users')
+          .select('name')
+          .eq('id', session.user.id)
+          .single();
+          
+        if (!error && profile && profile.name) {
+          userFullname = profile.name;
+        }
+      } catch (e) {
+        console.error('Ошибка загрузки имени', e);
+      }
+      
+      if (!userFullname) {
+        userFullname = session.user.user_metadata?.fullname || session.user.user_metadata?.full_name || email.split('@')[0];
+      }
+      
+      document.querySelectorAll('.dropdown-name').forEach(el => el.textContent = userFullname);
+      document.querySelectorAll('.dropdown-email').forEach(el => el.textContent = email);
+      document.querySelectorAll('.user-avatar').forEach(el => {
+        el.textContent = userFullname.substring(0, 2).toUpperCase();
+      });
     } else {
       document.body.classList.remove('logged-in');
+    }
+
+    // Защита маршрутов
+    const pathname = window.location.pathname;
+    const isAuthPage = pathname.endsWith('login.html');
+    const isPrivateRoute = pathname.endsWith('chat.html') || 
+                           pathname.endsWith('dashboard.html') || 
+                           pathname.endsWith('profile.html') || 
+                           pathname.endsWith('history.html');
+
+    if (isPrivateRoute && !isLoggedIn) {
+      window.location.replace('login.html');
+      return;
+    }
+    
+    if (isAuthPage && isLoggedIn) {
+      window.location.replace('dashboard.html');
+      return;
     }
 
     // Обработчик кнопки Выйти
     const logoutBtns = document.querySelectorAll('.logout-btn');
     logoutBtns.forEach(btn => {
-      btn.addEventListener('click', function(e) {
+      btn.addEventListener('click', async function(e) {
         e.preventDefault();
-        localStorage.setItem('isLoggedIn', 'false');
+        await window.supabaseClient.auth.signOut();
         window.location.href = 'index.html';
       });
+    });
+
+    // Реакция на изменение сессии (например в другой вкладке)
+    window.supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT') {
+        window.location.replace('index.html');
+      } else if (event === 'SIGNED_IN' && pathname.endsWith('login.html')) {
+        window.location.replace('dashboard.html');
+      }
     });
   }
 
   // --- Инициализация ---
-  document.addEventListener('DOMContentLoaded', function () {
-    initAuthState();
+  document.addEventListener('DOMContentLoaded', async function () {
+    await initAuthState();
     initBurgerMenu();
     initUserMenu();
   });

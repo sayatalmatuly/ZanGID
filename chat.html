@@ -7,6 +7,8 @@
   <title>Чат — ZanGID</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/chat.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
 </head>
 <body>
 
@@ -89,28 +91,8 @@
       </div>
 
       <div class="sidebar-list" id="sidebarList">
-        <div class="sidebar-label">Сегодня</div>
-        <div class="sidebar-item active" data-chat="1">
-          <span class="sidebar-item-icon">💬</span>
-          <span class="sidebar-item-text">Как открыть ИП в Казахстане</span>
-        </div>
-        <div class="sidebar-item" data-chat="2">
-          <span class="sidebar-item-icon">💬</span>
-          <span class="sidebar-item-text">Права при увольнении</span>
-        </div>
-
-        <div class="sidebar-label">Вчера</div>
-        <div class="sidebar-item" data-chat="3">
-          <span class="sidebar-item-icon">💬</span>
-          <span class="sidebar-item-text">Регистрация ТОО</span>
-        </div>
-        <div class="sidebar-item" data-chat="4">
-          <span class="sidebar-item-icon">💬</span>
-          <span class="sidebar-item-text">Алименты порядок взыскания</span>
-        </div>
+        <div class="sidebar-label">История запросов</div>
       </div>
-
-      <!-- TODO: Supabase - загрузить историю чатов -->
     </aside>
 
     <!-- Основная область чата -->
@@ -125,98 +107,12 @@
               <line x1="3" y1="18" x2="21" y2="18"/>
             </svg>
           </button>
-          <h2 class="chat-header-title" id="chatTitle">Как открыть ИП в Казахстане</h2>
+          <h2 class="chat-header-title" id="chatTitle">Новый чат</h2>
         </div>
       </div>
 
       <!-- Сообщения -->
-      <div class="chat-messages" id="chatMessages">
-
-        <!-- Сообщение пользователя -->
-        <div class="message user">
-          <div class="message-avatar">А</div>
-          <div class="message-bubble">
-            Как открыть ИП в Казахстане? Какие документы нужны и сколько это стоит?
-          </div>
-        </div>
-
-        <!-- Ответ бота -->
-        <div class="message bot">
-          <div class="message-avatar">ZG</div>
-          <div class="message-bubble">
-            <div>Вот пошаговая инструкция по открытию ИП в Казахстане:</div>
-
-            <div class="bot-step">
-              <span class="bot-step-number">1</span>
-              <span class="bot-step-text">Определите вид деятельности по классификатору ОКЭД. Это важно для правильной регистрации и выбора налогового режима.</span>
-            </div>
-
-            <div class="bot-step">
-              <span class="bot-step-number">2</span>
-              <span class="bot-step-text">Зарегистрируйтесь на портале eGov.kz или через приложение eGov mobile. Вам понадобится ЭЦП (электронная цифровая подпись).</span>
-            </div>
-
-            <div class="bot-step">
-              <span class="bot-step-number">3</span>
-              <span class="bot-step-text">Подайте уведомление о начале деятельности в качестве ИП. Регистрация бесплатная и занимает 1 рабочий день.</span>
-            </div>
-
-            <div class="bot-step">
-              <span class="bot-step-number">4</span>
-              <span class="bot-step-text">Выберите налоговый режим: упрощённая декларация (для оборота до 82 931 МРП) или патент (для определённых видов деятельности).</span>
-            </div>
-
-            <div class="bot-step">
-              <span class="bot-step-number">5</span>
-              <span class="bot-step-text">Откройте банковский счёт и зарегистрируйтесь в налоговых органах. После этого можно начинать работу.</span>
-            </div>
-
-            <div class="bot-pills">
-              <span class="pill doc">📄 Предпринимательский кодекс РК</span>
-              <span class="pill doc">📄 Налоговый кодекс, ст. 683</span>
-              <span class="pill link">🔗 egov.kz</span>
-              <span class="pill link">🔗 elicense.kz</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Второе сообщение пользователя -->
-        <div class="message user">
-          <div class="message-avatar">А</div>
-          <div class="message-bubble">
-            А какие налоги платит ИП на упрощёнке?
-          </div>
-        </div>
-
-        <!-- Второй ответ бота -->
-        <div class="message bot">
-          <div class="message-avatar">ZG</div>
-          <div class="message-bubble">
-            <div>Налоговый режим «Упрощённая декларация» предполагает следующие платежи:</div>
-
-            <div class="bot-step">
-              <span class="bot-step-number">1</span>
-              <span class="bot-step-text"><strong>Налоговая ставка — 3%</strong> от дохода за полугодие. Из них 1,5% — ИПН (индивидуальный подоходный налог) и 1,5% — социальный налог.</span>
-            </div>
-
-            <div class="bot-step">
-              <span class="bot-step-number">2</span>
-              <span class="bot-step-text"><strong>Социальные отчисления</strong> — 3,5% от заявленного дохода (минимум 1 МЗП).</span>
-            </div>
-
-            <div class="bot-step">
-              <span class="bot-step-number">3</span>
-              <span class="bot-step-text"><strong>Пенсионные взносы</strong> — 10% от заявленного дохода. Обязательны для всех ИП.</span>
-            </div>
-
-            <div class="bot-pills">
-              <span class="pill doc">📄 Налоговый кодекс РК, глава 77</span>
-              <span class="pill link">🔗 kgd.gov.kz</span>
-            </div>
-          </div>
-        </div>
-
-      </div>
+      <div class="chat-messages" id="chatMessages"></div>
 
       <!-- Поле ввода -->
       <div class="chat-input-area">

@@ -6,80 +6,106 @@
 (function () {
   'use strict';
 
-  document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', async function () {
+    if (!window.supabaseClient) return;
+
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+    if (!session) return; // app.js handle redirect
+
+    const user = session.user;
 
     var toggleThemeEl = document.getElementById('toggleTheme');
     var toggleNotifications = document.getElementById('toggleNotifications');
     var settingCity = document.getElementById('settingCity');
     var settingLanguage = document.getElementById('settingLanguage');
-    var logoutBtn = document.getElementById('logoutBtn');
+
+    const profileName = document.getElementById('profileName');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const profileCity = document.getElementById('profileCity');
+    const statQueries = document.getElementById('statQueries');
+    const statDocs = document.getElementById('statDocs');
+
+    try {
+      // 1. Загрузка профиля из users
+      let { data: profile, error } = await window.supabaseClient.from('users').select('*').eq('id', user.id).single();
+      
+      const fullName = profile?.name || user.user_metadata?.fullname || user.email.split('@')[0];
+      if (profileName) profileName.textContent = fullName;
+      if (profileAvatar) profileAvatar.textContent = fullName.substring(0, 2).toUpperCase();
+
+      if (!profile) {
+        // Создаем профиль при первом входе, если его нет
+        const { error: insertError } = await window.supabaseClient.from('users').upsert({
+          id: user.id,
+          name: fullName,
+          created_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+        if (insertError) console.error('Ошибка создания профиля', insertError);
+      } else {
+        if (settingCity && profile.city) settingCity.value = profile.city;
+        if (settingLanguage && profile.language) settingLanguage.value = profile.language;
+        if (profileCity && profile.city) profileCity.textContent = '📍 ' + profile.city;
+      }
+
+      // 2. Статистика (чаты, сообщения)
+      const { count: chatsCount } = await window.supabaseClient.from('chats').select('*', { count: 'exact', head: true }).eq('user_id', user.id);
+      if (statQueries) statQueries.textContent = chatsCount || 0;
+      
+      if (statDocs) {
+        // Подсчет сообщений текущего пользователя
+        const { count: msgsCount } = await window.supabaseClient.from('messages').select('chats!inner(*)', { count: 'exact', head: true }).eq('chats.user_id', user.id);
+        statDocs.textContent = msgsCount || 0;
+        const statLabel = statDocs.parentElement.childNodes[2]; 
+        if (statLabel && statLabel.nodeType === 3) {
+          statLabel.textContent = ' сообщений';
+        }
+      }
+
+    } catch (err) {
+      console.error('Ошибка профиля:', err);
+    }
+
+    // Сохранение профиля
+    async function saveProfile() {
+      const city = settingCity ? settingCity.value : '';
+      const language = settingLanguage ? settingLanguage.value : 'ru';
+      const fullName = profileName ? profileName.textContent : user.email.split('@')[0];
+
+      try {
+        const { error } = await window.supabaseClient.from('users').upsert({
+          id: user.id,
+          name: fullName,
+          city: city,
+          language: language,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+        if (error) throw error;
+        
+        if (profileCity) profileCity.textContent = city ? '📍 ' + city : 'Укажите город';
+        console.log('Профиль успешно сохранен!');
+      } catch (err) {
+        console.error('Ошибка сохранения профиля:', err);
+      }
+    }
+
+    if (settingCity) settingCity.addEventListener('change', saveProfile);
+    if (settingLanguage) settingLanguage.addEventListener('change', saveProfile);
 
     // --- Инициализация тоггла темы ---
     if (toggleThemeEl) {
-      // Устанавливаем начальное состояние
-      if (window.ZanGid && window.ZanGid.isDarkTheme()) {
-        toggleThemeEl.classList.add('active');
-      }
-
+      if (window.ZanGid && window.ZanGid.isDarkTheme()) toggleThemeEl.classList.add('active');
       toggleThemeEl.addEventListener('click', function () {
-        if (window.ZanGid) {
-          window.ZanGid.toggleTheme();
-        }
+        if (window.ZanGid) window.ZanGid.toggleTheme();
       });
     }
 
-    // --- Тоггл уведомлений ---
+    // --- Тоггл уведомлений (Локально) ---
     if (toggleNotifications) {
-      // Загружаем сохранённое состояние
       var notifSaved = localStorage.getItem('zangid-notifications');
-      if (notifSaved === 'true') {
-        toggleNotifications.classList.add('active');
-      }
-
+      if (notifSaved === 'true') toggleNotifications.classList.add('active');
       toggleNotifications.addEventListener('click', function () {
         toggleNotifications.classList.toggle('active');
-        var isActive = toggleNotifications.classList.contains('active');
-        localStorage.setItem('zangid-notifications', isActive);
-        // TODO: Supabase - сохранить настройки профиля
-      });
-    }
-
-    // --- Выбор города ---
-    if (settingCity) {
-      // Загружаем сохранённый город
-      var savedCity = localStorage.getItem('zangid-city');
-      if (savedCity) {
-        settingCity.value = savedCity;
-      }
-
-      settingCity.addEventListener('change', function () {
-        localStorage.setItem('zangid-city', settingCity.value);
-        // TODO: Supabase - сохранить настройки профиля
-        console.log('Город изменён:', settingCity.value);
-      });
-    }
-
-    // --- Выбор языка ---
-    if (settingLanguage) {
-      // Загружаем сохранённый язык
-      var savedLang = localStorage.getItem('zangid-language');
-      if (savedLang) {
-        settingLanguage.value = savedLang;
-      }
-
-      settingLanguage.addEventListener('change', function () {
-        localStorage.setItem('zangid-language', settingLanguage.value);
-        // TODO: Supabase - сохранить настройки профиля
-        console.log('Язык изменён:', settingLanguage.value);
-      });
-    }
-
-    // --- Выход из аккаунта ---
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', function () {
-        // TODO: Supabase auth - signOut()
-        console.log('Выход из аккаунта');
-        window.location.href = 'index.html';
+        localStorage.setItem('zangid-notifications', toggleNotifications.classList.contains('active'));
       });
     }
 

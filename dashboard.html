@@ -8,6 +8,8 @@
   <title>ZanGID — Панель управления</title>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/dashboard.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
 </head>
 
 <body>
@@ -94,7 +96,7 @@
   <!-- Шапка дашборда -->
   <section class="dashboard-header">
     <div class="dashboard-header-inner">
-      <h1>С возвращением, Айдар! 👋</h1>
+      <h1 id="dashboardGreeting">С возвращением! 👋</h1>
       <p>Продолжите разбираться в законах или создайте новый запрос</p>
     </div>
   </section>
@@ -107,22 +109,22 @@
       <div class="card stat-card">
         <div class="stat-icon">💬</div>
         <div class="stat-info">
-          <span class="stat-value">47</span>
+          <span class="stat-value" id="statQuestions">0</span>
           <span class="stat-label">Задано вопросов</span>
         </div>
       </div>
       <div class="card stat-card">
-        <div class="stat-icon">📄</div>
+        <div class="stat-icon">📑</div>
         <div class="stat-info">
-          <span class="stat-value">12</span>
-          <span class="stat-label">Сохранено документов</span>
+          <span class="stat-value" id="statChats">0</span>
+          <span class="stat-label">Активных чатов</span>
         </div>
       </div>
       <div class="card stat-card">
-        <div class="stat-icon">⚖️</div>
+        <div class="stat-icon">📅</div>
         <div class="stat-info">
-          <span class="stat-value">5</span>
-          <span class="stat-label">Трудовых споров</span>
+          <span class="stat-value" id="statDays">0</span>
+          <span class="stat-label">Дней с нами</span>
         </div>
       </div>
     </div>
@@ -135,63 +137,10 @@
           <a href="history.html" class="btn btn-ghost">Смотреть всё</a>
         </div>
         
-        <div class="recent-list">
-          <a href="chat.html" class="recent-item">
-            <div class="recent-item-main">
-              <div class="recent-icon">💼</div>
-              <div>
-                <div class="recent-title">Как уволиться по собственному желанию?</div>
-                <div class="recent-meta">
-                  <span>Трудовой кодекс РК</span>
-                  <span>•</span>
-                  <span>Вчера, 14:20</span>
-                </div>
-              </div>
-            </div>
-            <div class="recent-action">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </div>
-          </a>
-
-          <a href="chat.html" class="recent-item">
-            <div class="recent-item-main">
-              <div class="recent-icon">🏢</div>
-              <div>
-                <div class="recent-title">Процедура регистрации ТОО</div>
-                <div class="recent-meta">
-                  <span>Регистрация бизнеса</span>
-                  <span>•</span>
-                  <span>3 дня назад</span>
-                </div>
-              </div>
-            </div>
-            <div class="recent-action">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </div>
-          </a>
-
-          <a href="chat.html" class="recent-item">
-            <div class="recent-item-main">
-              <div class="recent-icon">🏠</div>
-              <div>
-                <div class="recent-title">Договор аренды квартиры: нюансы</div>
-                <div class="recent-meta">
-                  <span>Недвижимость</span>
-                  <span>•</span>
-                  <span>1 Неделю назад</span>
-                </div>
-              </div>
-            </div>
-            <div class="recent-action">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </div>
-          </a>
+        <div class="recent-list" id="recentRequestsList">
+          <div style="padding: 24px; text-align: center; color: var(--text-muted);">
+            Загрузка...
+          </div>
         </div>
       </div>
 
@@ -211,9 +160,11 @@
           <h3>Рекомендованные темы</h3>
           <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 12px;">Основано на ваших интересах</p>
           <div class="suggestions-list">
-            <a href="chat.html?q=Налоги+для+ТОО" class="suggestion-chip">Налогообложение ТОО</a>
-            <a href="chat.html?q=Возврат+товара" class="suggestion-chip">Права потребителя</a>
-            <a href="chat.html?q=Декретные+выплаты" class="suggestion-chip">Декретный отпуск в РК</a>
+            <a href="chat.html?q=Открыть ИП" class="suggestion-chip">Открыть ИП</a>
+            <a href="chat.html?q=Трудовые споры" class="suggestion-chip">Трудовые споры</a>
+            <a href="chat.html?q=Оформить наследство" class="suggestion-chip">Оформить наследство</a>
+            <a href="chat.html?q=Договор аренды" class="suggestion-chip">Договор аренды</a>
+            <a href="chat.html?q=Жалоба на КСК" class="suggestion-chip">Жалоба на КСК</a>
           </div>
         </div>
       </aside>
@@ -231,7 +182,38 @@
     </div>
   </footer>
 
+  <!-- Onboarding Popup -->
+  <div class="onboarding-overlay" id="onboardingPopup">
+    <div class="onboarding-card">
+      <h2 style="margin-bottom: 8px;">Давайте познакомимся! 👋</h2>
+      <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem;">Это поможет давать более точные ответы</p>
+      
+      <div class="onboarding-form">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 6px; font-weight: 500;">Как к вам обращаться? *</label>
+          <input type="text" id="onboardingName" placeholder="Ваше имя" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-component); color: var(--text-primary); font-family: inherit;">
+        </div>
+        
+        <div class="form-group" style="margin-bottom: 24px;">
+          <label style="display: block; margin-bottom: 6px; font-weight: 500;">Ваш город (необязательно)</label>
+          <div class="city-chips" id="cityChips" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+            <button class="city-chip city-btn">Алматы</button>
+            <button class="city-chip city-btn">Астана</button>
+            <button class="city-chip city-btn">Шымкент</button>
+            <button class="city-chip city-btn">Караганда</button>
+            <button class="city-chip city-btn">Актобе</button>
+            <button class="city-chip city-btn" id="otherCityBtn">Другой</button>
+          </div>
+          <input type="text" id="onboardingOtherCity" placeholder="Введите ваш город" style="display:none; width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-component); color: var(--text-primary); font-family: inherit;">
+        </div>
+        
+        <button class="btn btn-primary" id="onboardingSubmit" style="width: 100%; padding: 12px; border-radius: var(--radius-md);">Продолжить</button>
+      </div>
+    </div>
+  </div>
+
   <script src="js/app.js"></script>
+  <script src="js/dashboard.js"></script>
 </body>
 
 </html>

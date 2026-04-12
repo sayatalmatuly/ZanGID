@@ -64,36 +64,67 @@
 
     // --- Отправка формы ---
     if (loginForm) {
-      loginForm.addEventListener('submit', function (e) {
+      loginForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         var email = emailInput.value.trim();
         var password = passwordInput.value.trim();
 
         if (!email || !password) return;
+        
+        if (!window.supabaseClient) {
+          alert('Ошибка конфигурации Supabase. Клиент не инициализирован.');
+          return;
+        }
 
-        if (mode === 'login') {
-          // TODO: Supabase auth - signIn()
-          console.log('Вход:', email);
-          localStorage.setItem('isLoggedIn', 'true');
-          window.location.href = 'dashboard.html';
-        } else {
-          var name = nameInput.value.trim();
-          // TODO: Supabase auth - signUp()
-          console.log('Регистрация:', name, email);
-          localStorage.setItem('isLoggedIn', 'true');
-          window.location.href = 'dashboard.html';
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Загрузка...';
+        submitBtn.disabled = true;
+
+        try {
+          if (mode === 'login') {
+            const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+            console.log('Вход успешен:', data);
+            window.location.href = 'dashboard.html';
+          } else {
+            var name = nameInput.value.trim();
+            const { data, error } = await window.supabaseClient.auth.signUp({
+              email,
+              password,
+              options: {
+                data: { fullname: name }
+              }
+            });
+            if (error) throw error;
+            console.log('Регистрация успешна:', data);
+            window.location.href = 'dashboard.html';
+          }
+        } catch (error) {
+          console.error('Ошибка авторизации:', error);
+          alert(error.message === 'Invalid login credentials' ? 'Неверный email или пароль' : (error.message || 'Ошибка'));
+        } finally {
+          submitBtn.textContent = originalText;
+          submitBtn.disabled = false;
         }
       });
     }
 
     // --- Google OAuth ---
     if (googleBtn) {
-      googleBtn.addEventListener('click', function () {
-        // TODO: Supabase auth - signInWithOAuth Google
-        console.log('Google OAuth');
-        localStorage.setItem('isLoggedIn', 'true');
-        window.location.href = 'dashboard.html';
+      googleBtn.addEventListener('click', async function () {
+        if (!window.supabaseClient) return;
+        try {
+          await window.supabaseClient.auth.signInWithOAuth({ 
+            provider: 'google',
+            options: {
+              redirectTo: window.location.origin + '/dashboard.html'
+            }
+          });
+        } catch(e) {
+          console.error('Ошибка Google Auth', e);
+        }
       });
     }
 
