@@ -91,6 +91,41 @@
     });
   }
 
+  function showToast(message, type) {
+    var toastType = type || 'info';
+    var icons = { success: '✓', error: '✕', info: 'ℹ' };
+    var container = document.getElementById('toastContainer');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toastContainer';
+      container.className = 'toast-container';
+      document.body.appendChild(container);
+    }
+
+    var toast = document.createElement('div');
+    toast.className = 'toast toast-' + toastType;
+    toast.innerHTML =
+      '<div class="toast-icon">' + (icons[toastType] || icons.info) + '</div>' +
+      '<div class="toast-message"></div>' +
+      '<button class="toast-close" aria-label="Закрыть уведомление">×</button>';
+    toast.querySelector('.toast-message').textContent = message || '';
+    container.appendChild(toast);
+
+    var removeToast = function () {
+      if (!toast.parentNode) return;
+      toast.classList.add('toast-hide');
+      setTimeout(function () {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 240);
+    };
+
+    var timer = setTimeout(removeToast, 3000);
+    toast.querySelector('.toast-close').addEventListener('click', function () {
+      clearTimeout(timer);
+      removeToast();
+    });
+  }
+
   // --- Интеграция Supabase Auth ---
   async function initAuthState() {
     if (!window.supabaseClient) return;
@@ -188,7 +223,9 @@
   window.ZanGid = {
     toggleTheme: toggleTheme,
     isDarkTheme: isDarkTheme,
-    loadTheme: loadTheme
+    loadTheme: loadTheme,
+    showToast: showToast
   };
+  window.showToast = showToast;
 
 })();

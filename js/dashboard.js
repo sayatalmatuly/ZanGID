@@ -45,6 +45,9 @@
         dashboardGreeting.textContent = `С возвращением, ${userFullName}! 👋`;
         dashboardGreeting.classList.remove('user-identity-pending');
       }
+      if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
+        window.ZanGid.showToast('Добро пожаловать!', 'success');
+      }
 
       if (!profile || !profile.name) {
         // Показать онбординг, так как имя отсутствует
@@ -164,7 +167,9 @@
     onboardingSubmit.addEventListener('click', async () => {
       const name = onboardingName.value.trim();
       if (!name) {
-        alert('Пожалуйста, введите ваше имя');
+        if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
+          window.ZanGid.showToast('Пожалуйста, введите ваше имя', 'info');
+        }
         return;
       }
 
@@ -197,7 +202,9 @@
         
       } catch (err) {
         console.error('Ошибка сохранения профиля:', err);
-        alert('Произошла ошибка при сохранении данных');
+        if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
+          window.ZanGid.showToast('Произошла ошибка при сохранении данных', 'error');
+        }
       } finally {
         onboardingSubmit.textContent = 'Продолжить';
         onboardingSubmit.disabled = false;

@@ -225,6 +225,9 @@
           currentChatId = newChat.id;
           if (chatTitle) chatTitle.textContent = 'Новый чат';
           await loadChats();
+          if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
+            window.ZanGid.showToast('Новый чат создан', 'success');
+          }
           chatIdForTitleJob = newChat.id;
         }
 
@@ -379,7 +382,7 @@
 
       const dots = document.createElement('div');
       dots.className = 'typing-dots';
-      dots.innerHTML = '<span></span><span></span><span></span>';
+      dots.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
 
       bubble.appendChild(dots);
       msg.appendChild(avatar);
@@ -430,8 +433,7 @@
       window.history.replaceState({}, document.title, window.location.pathname);
     } else if (queryParam) {
       chatInput.value = queryParam;
-      setTimeout(() => sendMessage(), 300);
-      window.history.replaceState({}, document.title, window.location.pathname);
+      chatInput.focus();
     } else if (!currentChatId) {
       chatMessages.innerHTML = `
         <div style="display:flex; justify-content:center; align-items:center; height:100%; color:var(--text-muted);">

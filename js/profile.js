@@ -114,9 +114,14 @@
         if (error) throw error;
         
         if (profileCity) profileCity.textContent = city ? '📍 ' + city : 'Укажите город';
-        console.log('Профиль успешно сохранен!');
+        if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
+          window.ZanGid.showToast('Профиль сохранён', 'success');
+        }
       } catch (err) {
         console.error('Ошибка сохранения профиля:', err);
+        if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
+          window.ZanGid.showToast('Ошибка сохранения профиля', 'error');
+        }
       }
     }
 

@@ -73,7 +73,9 @@
         if (!email || !password) return;
         
         if (!window.supabaseClient) {
-          alert('Ошибка конфигурации Supabase. Клиент не инициализирован.');
+          if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
+            window.ZanGid.showToast('Ошибка конфигурации Supabase. Клиент не инициализирован.', 'error');
+          }
           return;
         }
 
@@ -103,7 +105,12 @@
           }
         } catch (error) {
           console.error('Ошибка авторизации:', error);
-          alert(error.message === 'Invalid login credentials' ? 'Неверный email или пароль' : (error.message || 'Ошибка'));
+          if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
+            window.ZanGid.showToast(
+              error.message === 'Invalid login credentials' ? 'Неверный email или пароль' : (error.message || 'Ошибка'),
+              'error'
+            );
+          }
         } finally {
           submitBtn.textContent = originalText;
           submitBtn.disabled = false;

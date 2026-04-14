@@ -102,11 +102,11 @@
 
       if (!chats || chats.length === 0) {
         timeline.innerHTML =
-          '<div class="history-empty">' +
-          '<div class="history-empty-icon">🔍</div>' +
-          '<h4 class="history-empty-title">История пуста</h4>' +
-          '<p class="history-empty-text">Вы ещё не задавали вопросов</p>' +
-          '<a href="chat.html" class="btn btn-primary history-empty-btn">Начать</a>' +
+          '<div class="empty-state">' +
+          '<div class="empty-state-icon">🔍</div>' +
+          '<h4 class="empty-state-title">История пуста</h4>' +
+          '<p class="empty-state-text">Вы ещё не задавали вопросов</p>' +
+          '<button class="btn btn-primary empty-state-btn" type="button" onclick="window.location.href=\'chat.html\'">Задать первый вопрос</button>' +
           '</div>';
         return;
       }
