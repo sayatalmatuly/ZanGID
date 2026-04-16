@@ -1,81 +1,93 @@
-/**
- * ZanGID — Логика главной страницы
- * Поиск, чипы, навигация к чату
- */
-
-(function () {
+﻿(function () {
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
-
-    // --- Поиск в hero-секции ---
     var heroSearch = document.getElementById('heroSearch');
     var heroInput = document.getElementById('heroSearchInput');
+    var popularChips = document.getElementById('popularChips');
 
-    if (heroSearch) {
-      heroSearch.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var query = heroInput.value.trim();
-        if (query) {
-          // Переходим в чат с запросом
-          window.location.href = 'chat.html?q=' + encodeURIComponent(query);
-        }
+    function getData(key) {
+      return window.ZanGidI18n.get(key, window.ZanGid.getLanguage());
+    }
+
+    function goToChat(query) {
+      if (!query) return;
+      window.location.href = 'chat.html?q=' + encodeURIComponent(query);
+    }
+
+    function renderPopularChips() {
+      if (!popularChips) return;
+      popularChips.innerHTML = '';
+      (getData('landing.popular') || []).forEach(function (item) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'chip';
+        button.textContent = item.label;
+        button.addEventListener('click', function () {
+          goToChat(item.query);
+        });
+        popularChips.appendChild(button);
       });
     }
 
-    // --- Клик по популярным чипам ---
-    var chips = document.querySelectorAll('#popularChips .chip');
-    chips.forEach(function (chip) {
-      chip.addEventListener('click', function () {
-        var query = chip.getAttribute('data-query');
-        if (query) {
-          window.location.href = 'chat.html?q=' + encodeURIComponent(query);
-        }
+    function bindCategoryCards() {
+      var categoryMap = {
+        categoryProperty: 'landing.categoryQueries.property',
+        categoryBusiness: 'landing.categoryQueries.business',
+        categoryLabor: 'landing.categoryQueries.labor',
+        categoryUtilities: 'landing.categoryQueries.utilities'
+      };
+
+      Object.keys(categoryMap).forEach(function (id) {
+        var card = document.getElementById(id);
+        if (!card || card.dataset.bound === 'true') return;
+        card.dataset.bound = 'true';
+        card.addEventListener('click', function (event) {
+          event.preventDefault();
+          goToChat(getData(categoryMap[id]));
+        });
       });
-    });
+    }
 
-    // --- Категории с предзаполненным контекстом ---
-    var categoryQueryMap = {
-      categoryProperty: 'недвижимость',
-      categoryBusiness: 'бизнес и предпринимательство',
-      categoryLabor: 'трудовые споры',
-      categoryUtilities: 'ЖКХ и коммунальные услуги'
-    };
+    function initAnimations() {
+      var animated = document.querySelectorAll('.hero-note-card, .hero-preview, .category-card, .feature-card, .step-card');
+      if (!('IntersectionObserver' in window)) return;
 
-    Object.keys(categoryQueryMap).forEach(function (id) {
-      var card = document.getElementById(id);
-      if (!card) return;
-      card.addEventListener('click', function (e) {
-        e.preventDefault();
-        window.location.href = 'chat.html?q=' + encodeURIComponent(categoryQueryMap[id]);
-      });
-    });
-
-    // --- Анимация появления при скролле ---
-    var observerOptions = {
-      threshold: 0.15,
-      rootMargin: '0px 0px -40px 0px'
-    };
-
-    var observer = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
           entry.target.style.opacity = '1';
           entry.target.style.transform = 'translateY(0)';
           observer.unobserve(entry.target);
-        }
+        });
+      }, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -40px 0px'
       });
-    }, observerOptions);
 
-    // Элементы с анимацией появления
-    var animatedElements = document.querySelectorAll('.category-card, .step-card');
-    animatedElements.forEach(function (el) {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(20px)';
-      el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
-      observer.observe(el);
+      animated.forEach(function (node, index) {
+        node.style.opacity = '0';
+        node.style.transform = 'translateY(18px)';
+        node.style.transition = 'opacity 0.45s ease, transform 0.45s ease';
+        node.style.transitionDelay = Math.min(index * 40, 180) + 'ms';
+        observer.observe(node);
+      });
+    }
+
+    document.addEventListener('zangid:languagechange', function () {
+      renderPopularChips();
+      bindCategoryCards();
     });
 
-  });
+    if (heroSearch) {
+      heroSearch.addEventListener('submit', function (event) {
+        event.preventDefault();
+        goToChat(String(heroInput.value || '').trim());
+      });
+    }
 
+    renderPopularChips();
+    bindCategoryCards();
+    initAnimations();
+  });
 })();

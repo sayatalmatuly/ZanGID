@@ -1,447 +1,917 @@
-/**
- * ZanGID — Логика чата
- * Интеграция с Supabase и Backend API
- */
-
-(function () {
+﻿(function () {
   'use strict';
 
   document.addEventListener('DOMContentLoaded', async function () {
-
     if (!window.supabaseClient) {
       console.warn('Supabase не инициализирован');
       return;
     }
 
-    const { data: { session } } = await window.supabaseClient.auth.getSession();
-    if (!session) return; // app.js handles redirect
+    var sessionData = await window.supabaseClient.auth.getSession();
+    var session = sessionData && sessionData.data ? sessionData.data.session : null;
+    if (!session) return;
 
-    const user = session.user;
-    let currentChatId = null;
+    var user = session.user;
+    var currentChatId = null;
+    var chatsCache = [];
+    var messagesCache = [];
 
-    const backendUrl = ''; // тот же бэкенд, что и для /api/chat
-    const CHAT_TITLE_PATH = '/api/chat-title';
+    var backendUrl = typeof window.ZANGID_API_BASE === 'string' ? window.ZANGID_API_BASE : '';
+    var CHAT_TITLE_PATH = '/api/chat-title';
 
-    const chatInput = document.getElementById('chatInput');
-    const chatSendBtn = document.getElementById('chatSendBtn');
-    const chatMessages = document.getElementById('chatMessages');
-    const chatTitle = document.getElementById('chatTitle');
-    const newChatBtn = document.getElementById('newChatBtn');
-    const sidebarToggle = document.getElementById('sidebarToggle');
-    const chatSidebar = document.getElementById('chatSidebar');
-    const sidebarList = document.getElementById('sidebarList');
+    var chatInput = document.getElementById('chatInput');
+    var chatSendBtn = document.getElementById('chatSendBtn');
+    var chatMessages = document.getElementById('chatMessages');
+    var chatTitle = document.getElementById('chatTitle');
+    var newChatBtn = document.getElementById('newChatBtn');
+    var sidebarToggle = document.getElementById('sidebarToggle');
+    var chatSidebar = document.getElementById('chatSidebar');
+    var sidebarList = document.getElementById('sidebarList');
+
+    function t(key, vars) {
+      return window.ZanGid.t(key, vars);
+    }
+
+    function getI18nValue(key) {
+      return window.ZanGidI18n.get(key, window.ZanGid.getLanguage());
+    }
+
+    function getUntitledChatTitle() {
+      return t('common.untitledChat');
+    }
+
+    function deserializeMessageContent(raw) {
+      if (raw == null || typeof raw !== 'string') return raw;
+      var trimmed = raw.trim();
+      if (!trimmed) return '';
+      if (trimmed.charAt(0) !== '{' && trimmed.charAt(0) !== '[') return raw;
+      try {
+        return JSON.parse(trimmed);
+      } catch (error) {
+        return raw;
+      }
+    }
+
+    function serializeMessageContent(content) {
+      return typeof content === 'string' ? content : JSON.stringify(content);
+    }
 
     function buildTitlePrompt(userQuestion) {
-      return (
-        'Придумай краткое название для чата из 3-5 слов на основе этого вопроса: ' +
-        userQuestion +
-        '. Только название, без кавычек и точек.'
-      );
+      return 'Придумай краткое название для чата из 3-5 слов на основе этого вопроса: ' + userQuestion + '. Только название, без кавычек и точек.';
     }
 
     function sanitizeChatTitle(raw) {
       if (raw == null) return '';
-      let s = String(raw).trim();
-      const firstLine = s.split(/\r?\n/)[0] || '';
-      s = firstLine.trim();
-      s = s.replace(/^["«»]|["«»]$/g, '').trim();
-      s = s.replace(/\.+$/g, '').trim();
-      return s.slice(0, 120);
+      var title = String(raw).trim();
+      title = (title.split(/\r?\n/)[0] || '').trim();
+      title = title.replace(/^["«»'“”„]+|["«»'“”„]+$/g, '').trim();
+      title = title.replace(/[.?!]+$/g, '').trim();
+      return title.slice(0, 80);
+    }
+
+    function deriveFallbackTitleFromQuestion(question) {
+      var cleaned = String(question || '')
+        .replace(/\s+/g, ' ')
+        .replace(/[?!.]+$/g, '')
+        .trim();
+      if (!cleaned) return getUntitledChatTitle();
+      var words = cleaned.split(' ').filter(Boolean).slice(0, 4).join(' ');
+      return words ? words.charAt(0).toUpperCase() + words.slice(1) : getUntitledChatTitle();
     }
 
     async function requestChatTitle(userQuestion) {
-      const safeQ = typeof userQuestion === 'string' ? userQuestion.trim() : '';
-      if (!safeQ) return null;
+      var safeQuestion = typeof userQuestion === 'string' ? userQuestion.trim() : '';
+      if (!safeQuestion) return null;
 
-      const prompt = buildTitlePrompt(safeQ);
-      const payload = { question: safeQ, prompt };
+      var payload = {
+        question: safeQuestion,
+        prompt: buildTitlePrompt(safeQuestion)
+      };
 
-      const apiBase =
-        (typeof window !== 'undefined' && window.ZANGID_API_BASE) || backendUrl;
-
-      if (apiBase) {
+      if (backendUrl) {
         try {
-          const base = String(apiBase).replace(/\/$/, '');
-          const res = await fetch(base + CHAT_TITLE_PATH, {
+          var base = String(backendUrl).replace(/\/$/, '');
+          var response = await fetch(base + CHAT_TITLE_PATH, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
           });
-          if (res.ok) {
-            const data = await res.json().catch(function () { return {}; });
-            const t = data.title != null ? String(data.title) : '';
-            const sanitized = sanitizeChatTitle(t);
-            if (sanitized) return sanitized;
+
+          if (response.ok) {
+            var data = await response.json().catch(function () { return {}; });
+            var fetchedTitle = sanitizeChatTitle(data.title || data.message || '');
+            if (fetchedTitle) return fetchedTitle;
           }
-        } catch (e) {
-          console.debug('chat-title HTTP:', e);
+        } catch (error) {
+          console.debug('chat-title HTTP:', error);
         }
       }
 
-      const fnName =
-        (typeof window !== 'undefined' && window.ZANGID_SUPABASE_TITLE_FUNCTION) ||
-        'generate-chat-title';
+      var functionName = typeof window.ZANGID_SUPABASE_TITLE_FUNCTION === 'string'
+        ? window.ZANGID_SUPABASE_TITLE_FUNCTION
+        : 'generate-chat-title';
+
       try {
-        const { data, error } = await window.supabaseClient.functions.invoke(fnName, {
+        var functionResponse = await window.supabaseClient.functions.invoke(functionName, {
           body: payload
         });
-        if (error) return null;
-        if (data == null) return null;
-        const t =
-          typeof data === 'string'
-            ? data
-            : data.title != null
-              ? String(data.title)
-              : '';
-        return sanitizeChatTitle(t) || null;
-      } catch (e) {
-        console.debug('chat-title Edge Function:', e);
+        if (functionResponse.error) return null;
+        var edgeTitle = sanitizeChatTitle(
+          typeof functionResponse.data === 'string'
+            ? functionResponse.data
+            : functionResponse.data && functionResponse.data.title
+              ? functionResponse.data.title
+              : ''
+        );
+        return edgeTitle || null;
+      } catch (error) {
+        console.debug('chat-title edge:', error);
         return null;
       }
     }
 
-    async function applyGeneratedChatTitle(chatId, userQuestion) {
-      const title = await requestChatTitle(userQuestion);
-      if (!title) return;
+    function updateChatCacheTitle(chatId, title) {
+      chatsCache = chatsCache.map(function (chat) {
+        if (chat.id === chatId) {
+          chat.title = title;
+        }
+        return chat;
+      });
+    }
+
+    function setCurrentTitle(title) {
+      if (!chatTitle) return;
+      chatTitle.textContent = title || getUntitledChatTitle();
+    }
+
+    async function persistChatTitle(chatId, title) {
+      if (!chatId || !title) return;
       try {
-        const { error } = await window.supabaseClient
+        var response = await window.supabaseClient
           .from('chats')
-          .update({ title })
+          .update({ title: title })
           .eq('id', chatId)
           .eq('user_id', user.id);
-        if (error) throw error;
-        if (currentChatId === chatId && chatTitle) {
-          chatTitle.textContent = title;
-        }
-        const row = sidebarList.querySelector('[data-chat-id="' + chatId + '"] .sidebar-item-text');
-        if (row) row.textContent = title;
-      } catch (e) {
-        console.error('Ошибка обновления названия чата:', e);
+        if (response.error) throw response.error;
+      } catch (error) {
+        console.error('Ошибка обновления названия чата:', error);
       }
     }
 
-    // --- Загрузка истории чатов в сайдбар ---
+    async function applyGeneratedChatTitle(chatId, userQuestion) {
+      var generatedTitle = await requestChatTitle(userQuestion);
+      if (!generatedTitle) return;
+      updateChatCacheTitle(chatId, generatedTitle);
+      if (currentChatId === chatId) {
+        setCurrentTitle(generatedTitle);
+      }
+      await persistChatTitle(chatId, generatedTitle);
+      renderSidebarList();
+    }
+
+    function renderSidebarLabel() {
+      return '<div class="sidebar-label">' + t('chat.sidebarLabel') + '</div>';
+    }
+
+    function renderSidebarLoading() {
+      sidebarList.innerHTML = renderSidebarLabel() + window.ZanGid.createSkeletonMarkup(4, 'row');
+    }
+
+    function renderSidebarState(type, title, text) {
+      sidebarList.innerHTML = renderSidebarLabel() + window.ZanGid.createStateMarkup({
+        type: type,
+        compact: true,
+        title: title,
+        text: text
+      });
+    }
+
+    function renderSidebarList() {
+      sidebarList.innerHTML = renderSidebarLabel();
+
+      if (!chatsCache.length) {
+        renderSidebarState('empty', t('chat.sidebarEmptyTitle'), t('chat.sidebarEmptyText'));
+        return;
+      }
+
+      chatsCache.forEach(function (chat) {
+        var item = document.createElement('div');
+        item.className = 'sidebar-item' + (currentChatId === chat.id ? ' active' : '');
+        item.dataset.chatId = chat.id;
+        item.innerHTML =
+          '<div class="sidebar-item-icon">ZG</div>' +
+          '<div class="sidebar-item-body">' +
+            '<span class="sidebar-item-text"></span>' +
+            '<span class="sidebar-item-meta"></span>' +
+          '</div>';
+        item.querySelector('.sidebar-item-text').textContent = chat.title || getUntitledChatTitle();
+        item.querySelector('.sidebar-item-meta').textContent = window.ZanGid.formatDate(chat.created_at, {
+          day: 'numeric',
+          month: 'short'
+        });
+        item.addEventListener('click', function () {
+          loadChatMessages(chat.id, chat.title);
+        });
+        sidebarList.appendChild(item);
+      });
+    }
+
     async function loadChats() {
+      renderSidebarLoading();
       try {
-        const { data: chats, error } = await window.supabaseClient
+        var response = await window.supabaseClient
           .from('chats')
           .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
-
-        sidebarList.innerHTML = '<div class="sidebar-label">История запросов</div>';
-
-        if (chats && chats.length > 0) {
-          chats.forEach(chat => {
-            const item = document.createElement('div');
-            item.className = 'sidebar-item ' + (currentChatId === chat.id ? 'active' : '');
-            item.dataset.chatId = chat.id;
-            item.innerHTML = `
-              <span class="sidebar-item-icon">💬</span>
-              <span class="sidebar-item-text">${chat.title || 'Новый чат'}</span>
-            `;
-            
-            item.addEventListener('click', () => loadChatMessages(chat.id, chat.title));
-            sidebarList.appendChild(item);
-          });
-        } else {
-          const emptyItem = document.createElement('div');
-          emptyItem.style.padding = '12px 16px';
-          emptyItem.style.color = 'var(--text-muted)';
-          emptyItem.style.fontSize = '0.875rem';
-          emptyItem.textContent = 'Здесь будет ваша история запросов';
-          sidebarList.appendChild(emptyItem);
-        }
-      } catch (err) {
-        console.error('Ошибка загрузки истории чатов:', err);
+        if (response.error) throw response.error;
+        chatsCache = response.data || [];
+        renderSidebarList();
+      } catch (error) {
+        console.error('Ошибка загрузки истории чатов:', error);
+        renderSidebarState('error', t('chat.sidebarErrorTitle'), t('chat.sidebarErrorText'));
       }
     }
 
-    // --- Загрузка сообщений конкретного чата ---
-    async function loadChatMessages(chatId, title) {
-      currentChatId = chatId;
-      if (chatTitle) chatTitle.textContent = title || 'Новый чат';
-      chatMessages.innerHTML = ''; // очистка
-      
-      document.querySelectorAll('.sidebar-item').forEach(el => {
-        el.classList.toggle('active', el.dataset.chatId === chatId);
-      });
-
-      if (window.innerWidth <= 768) {
+    function closeSidebarOnMobile() {
+      if (window.innerWidth <= 880 && chatSidebar) {
         chatSidebar.classList.remove('open');
       }
+    }
 
-      const typingEl = showTypingIndicator(); 
+    function normalizeStringArray(value) {
+      if (!value) return [];
+      if (Array.isArray(value)) {
+        return value.map(function (item) {
+          return String(item || '').trim();
+        }).filter(Boolean);
+      }
+      if (typeof value === 'string') {
+        return value.split(/\r?\n/).map(function (item) {
+          return item.replace(/^[-•]\s*/, '').trim();
+        }).filter(Boolean);
+      }
+      return [];
+    }
+
+    function normalizeSources(value) {
+      if (!value) return [];
+      if (!Array.isArray(value)) {
+        return typeof value === 'string' ? [{ title: value, article: '', url: '' }] : [];
+      }
+      return value.map(function (item) {
+        if (typeof item === 'string') {
+          return { title: item, article: '', url: '' };
+        }
+        return {
+          title: String(item.title || item.name || t('chat.sourceFallback')).trim(),
+          article: String(item.article || item.meta || '').trim(),
+          url: String(item.url || '').trim()
+        };
+      }).filter(function (item) {
+        return item.title;
+      });
+    }
+
+    function hasStructuredData(payload) {
+      if (!payload || typeof payload !== 'object') return false;
+      return Boolean(
+        (payload.summary && String(payload.summary).trim()) ||
+        (payload.steps && payload.steps.length) ||
+        (payload.documents && payload.documents.length) ||
+        (payload.sources && payload.sources.length) ||
+        (payload.disclaimer && String(payload.disclaimer).trim())
+      );
+    }
+
+    function normalizeStructuredObject(value) {
+      if (!value) return null;
+
+      if (Array.isArray(value)) {
+        if (value.every(function (item) { return typeof item === 'string'; })) {
+          return { steps: normalizeStringArray(value) };
+        }
+
+        var arrayPayload = {
+          summary: '',
+          steps: [],
+          documents: [],
+          sources: [],
+          disclaimer: ''
+        };
+
+        value.forEach(function (item) {
+          if (!item || typeof item !== 'object') return;
+          var type = String(item.type || item.kind || '').toLowerCase();
+          if (type === 'summary' || type === 'short_answer') {
+            arrayPayload.summary = String(item.content || item.text || item.value || '').trim();
+          }
+          if (type === 'steps') {
+            arrayPayload.steps = normalizeStringArray(item.items || item.steps || item.content || item.value);
+          }
+          if (type === 'documents') {
+            arrayPayload.documents = normalizeStringArray(item.items || item.documents || item.content || item.value);
+          }
+          if (type === 'sources') {
+            arrayPayload.sources = normalizeSources(item.items || item.sources || item.content || item.value);
+          }
+          if (type === 'disclaimer' || type === 'note') {
+            arrayPayload.disclaimer = String(item.content || item.text || item.value || '').trim();
+          }
+        });
+
+        return hasStructuredData(arrayPayload) ? arrayPayload : null;
+      }
+
+      if (typeof value !== 'object') return null;
+
+      var structured = {
+        summary: String(value.summary || value.shortAnswer || value.short_answer || value.answer || '').trim(),
+        steps: normalizeStringArray(value.steps || value.instructions || value.step_by_step || value.actions),
+        documents: normalizeStringArray(value.documents || value.required_documents || value.docs),
+        sources: normalizeSources(value.sources || value.legal_basis || value.references),
+        disclaimer: String(value.disclaimer || value.note || value.important_note || value.important || '').trim()
+      };
+
+      return hasStructuredData(structured) ? structured : null;
+    }
+
+    function parsePlainText(text) {
+      var normalized = String(text || '').replace(/\r/g, '').trim();
+      if (!normalized) return { paragraphs: [] };
+
+      var lines = normalized.split('\n');
+      var intro = [];
+      var steps = [];
+      var currentStep = null;
+
+      lines.forEach(function (line) {
+        var trimmed = line.trim();
+        var numbered = trimmed.match(/^(\d+)[.)]\s+(.*)$/);
+
+        if (numbered) {
+          if (currentStep) {
+            steps.push(currentStep.trim());
+          }
+          currentStep = numbered[2].trim();
+          return;
+        }
+
+        if (currentStep) {
+          if (trimmed) {
+            currentStep += ' ' + trimmed;
+          } else {
+            steps.push(currentStep.trim());
+            currentStep = null;
+          }
+          return;
+        }
+
+        if (trimmed) {
+          intro.push(trimmed);
+        }
+      });
+
+      if (currentStep) {
+        steps.push(currentStep.trim());
+      }
+
+      if (steps.length >= 1) {
+        return {
+          summary: intro.join(' '),
+          steps: steps
+        };
+      }
+
+      return {
+        paragraphs: normalized.split(/\n{2,}/).map(function (chunk) {
+          return chunk.trim();
+        }).filter(Boolean)
+      };
+    }
+
+    function normalizeAssistantPayload(content) {
+      var parsed = deserializeMessageContent(content);
+      var structured = normalizeStructuredObject(parsed);
+      if (structured) return structured;
+      if (typeof parsed === 'string') return parsePlainText(parsed);
+      return { paragraphs: [String(content || '')] };
+    }
+
+    function createParagraphs(paragraphs) {
+      var wrapper = document.createElement('div');
+      (paragraphs || []).forEach(function (text) {
+        if (!text) return;
+        var paragraph = document.createElement('p');
+        paragraph.textContent = text;
+        wrapper.appendChild(paragraph);
+      });
+      return wrapper;
+    }
+
+    function createSection(title) {
+      var section = document.createElement('section');
+      section.className = 'assistant-section';
+
+      var heading = document.createElement('div');
+      heading.className = 'assistant-section-title';
+      heading.textContent = title;
+      section.appendChild(heading);
+      return section;
+    }
+
+    function createStepsSection(steps) {
+      var section = createSection(t('chat.steps'));
+      var list = document.createElement('div');
+      list.className = 'assistant-step-list';
+
+      (steps || []).forEach(function (step, index) {
+        var row = document.createElement('div');
+        row.className = 'assistant-step-row';
+
+        var badge = document.createElement('span');
+        badge.className = 'assistant-step-badge';
+        badge.textContent = String(index + 1);
+
+        var text = document.createElement('div');
+        text.className = 'assistant-step-text';
+        text.textContent = step;
+
+        row.appendChild(badge);
+        row.appendChild(text);
+        list.appendChild(row);
+      });
+
+      section.appendChild(list);
+      return section;
+    }
+
+    function createDocumentsSection(documents) {
+      var section = createSection(t('chat.documents'));
+      var list = document.createElement('div');
+      list.className = 'assistant-doc-list';
+
+      (documents || []).forEach(function (documentItem) {
+        var item = document.createElement('div');
+        item.className = 'assistant-doc-item';
+        item.textContent = documentItem;
+        list.appendChild(item);
+      });
+
+      section.appendChild(list);
+      return section;
+    }
+
+    function createSourcesSection(sources) {
+      var section = createSection(t('chat.sources'));
+      var list = document.createElement('div');
+      list.className = 'assistant-source-list';
+
+      (sources || []).forEach(function (source) {
+        var item = document.createElement('div');
+        item.className = 'assistant-source-item';
+
+        var title = document.createElement('span');
+        title.className = 'assistant-source-title';
+        title.textContent = source.title;
+        item.appendChild(title);
+
+        if (source.article) {
+          var meta = document.createElement('span');
+          meta.className = 'assistant-source-meta';
+          meta.textContent = source.article;
+          item.appendChild(meta);
+        }
+
+        if (source.url && source.url !== '#') {
+          var link = document.createElement('a');
+          link.className = 'assistant-source-link';
+          link.href = source.url;
+          link.target = '_blank';
+          link.rel = 'noreferrer noopener';
+          link.textContent = source.url;
+          item.appendChild(link);
+        }
+
+        list.appendChild(item);
+      });
+
+      section.appendChild(list);
+      return section;
+    }
+
+    function renderAssistantPayload(payload) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'assistant-content';
+
+      if (payload.summary) {
+        var summarySection = createSection(t('chat.shortAnswer'));
+        var summary = document.createElement('div');
+        summary.className = 'assistant-summary';
+        summary.textContent = payload.summary;
+        summarySection.appendChild(summary);
+        wrapper.appendChild(summarySection);
+      }
+
+      if (payload.paragraphs && payload.paragraphs.length) {
+        wrapper.appendChild(createParagraphs(payload.paragraphs));
+      }
+
+      if (payload.steps && payload.steps.length) {
+        wrapper.appendChild(createStepsSection(payload.steps));
+      }
+
+      if (payload.documents && payload.documents.length) {
+        wrapper.appendChild(createDocumentsSection(payload.documents));
+      }
+
+      if (payload.sources && payload.sources.length) {
+        wrapper.appendChild(createSourcesSection(payload.sources));
+      }
+
+      if (payload.disclaimer) {
+        var noteSection = createSection(t('chat.important'));
+        var note = document.createElement('div');
+        note.className = 'assistant-note';
+        note.textContent = payload.disclaimer;
+        noteSection.appendChild(note);
+        wrapper.appendChild(noteSection);
+      }
+
+      if (!wrapper.childNodes.length) {
+        wrapper.appendChild(createParagraphs([String(payload.raw || '')]));
+      }
+
+      return wrapper;
+    }
+
+    function createMessageElement(role, content) {
+      var message = document.createElement('article');
+      message.className = 'message ' + role;
+
+      var avatar = document.createElement('div');
+      avatar.className = 'message-avatar';
+      avatar.textContent = role === 'user'
+        ? window.ZanGid.getInitials(user.user_metadata?.fullname || user.email || 'U')
+        : 'ZG';
+
+      var card = document.createElement('div');
+      card.className = 'message-card';
+
+      var label = document.createElement('div');
+      label.className = 'message-label';
+      label.textContent = role === 'user' ? t('chat.you') : t('chat.assistant');
+
+      var bubble = document.createElement('div');
+      bubble.className = 'message-bubble';
+
+      if (role === 'assistant') {
+        bubble.appendChild(renderAssistantPayload(normalizeAssistantPayload(content)));
+      } else {
+        bubble.appendChild(createParagraphs(String(content || '').split(/\n{2,}/)));
+      }
+
+      card.appendChild(label);
+      card.appendChild(bubble);
+      message.appendChild(avatar);
+      message.appendChild(card);
+
+      return message;
+    }
+
+    function rerenderMessages() {
+      if (!messagesCache.length) {
+        renderEmptyChat();
+        return;
+      }
+
+      chatMessages.innerHTML = '';
+      messagesCache.forEach(function (message) {
+        chatMessages.appendChild(createMessageElement(message.role, message.content));
+      });
+      scrollToBottom();
+    }
+
+    function appendMessage(role, content, pushToCache) {
+      chatMessages.appendChild(createMessageElement(role, content));
+      if (pushToCache !== false) {
+        messagesCache.push({ role: role, content: content });
+      }
+    }
+
+    function renderEmptyChat() {
+      messagesCache = [];
+      chatMessages.innerHTML = '';
+
+      var emptyState = document.createElement('div');
+      emptyState.className = 'chat-empty';
+
+      var title = document.createElement('h2');
+      title.textContent = t('chat.emptyTitle');
+      emptyState.appendChild(title);
+
+      var text = document.createElement('p');
+      text.textContent = t('chat.emptyText');
+      emptyState.appendChild(text);
+
+      var label = document.createElement('div');
+      label.className = 'chat-empty-label';
+      label.textContent = t('chat.emptySuggestionLabel');
+      emptyState.appendChild(label);
+
+      var actions = document.createElement('div');
+      actions.className = 'chat-empty-actions';
+
+      (getI18nValue('chat.emptyStateSuggestions') || []).forEach(function (query) {
+        var button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'chat-suggestion-btn';
+        button.textContent = query;
+        button.addEventListener('click', function () {
+          chatInput.value = query;
+          autoResizeTextarea();
+          chatInput.focus();
+        });
+        actions.appendChild(button);
+      });
+
+      emptyState.appendChild(actions);
+      chatMessages.appendChild(emptyState);
+    }
+
+    function renderMessagesLoading() {
+      chatMessages.innerHTML = window.ZanGid.createSkeletonMarkup(3, 'row');
+    }
+
+    async function loadChatMessages(chatId, title) {
+      currentChatId = chatId;
+      setCurrentTitle(title || getUntitledChatTitle());
+      renderMessagesLoading();
+      renderSidebarList();
+      closeSidebarOnMobile();
 
       try {
-        const { data: messages, error } = await window.supabaseClient
+        var response = await window.supabaseClient
           .from('messages')
           .select('*')
           .eq('chat_id', chatId)
           .order('created_at', { ascending: true });
 
-        removeTypingIndicator(typingEl);
-        if (error) throw error;
+        if (response.error) throw response.error;
 
-        messages.forEach(msg => {
-          if (msg.role === 'user') {
-            appendUserMessage(msg.content);
-          } else {
-            appendAssistantMessage(msg.content);
-          }
+        messagesCache = (response.data || []).map(function (message) {
+          return {
+            role: message.role,
+            content: deserializeMessageContent(message.content)
+          };
         });
-        scrollToBottom();
-      } catch (err) {
-        removeTypingIndicator(typingEl);
-        console.error('Ошибка загрузки сообщений:', err);
+
+        rerenderMessages();
+      } catch (error) {
+        console.error('Ошибка загрузки сообщений:', error);
+        chatMessages.innerHTML = window.ZanGid.createStateMarkup({
+          type: 'error',
+          title: t('chat.systemError'),
+          text: t('chat.sidebarErrorText')
+        });
       }
     }
 
-    // --- Отправка сообщения ---
-    async function sendMessage() {
-      const text = chatInput.value.trim();
-      if (!text) return;
-
-      appendUserMessage(text);
-      chatInput.value = '';
-      scrollToBottom();
-
-      const typingEl = showTypingIndicator();
-
-      let chatIdForTitleJob = null;
-
-      try {
-        // 1. Создаем чат, если это первое сообщение
-        if (!currentChatId) {
-          const { data: newChat, error: chatError } = await window.supabaseClient
-            .from('chats')
-            .insert([{ user_id: user.id, title: 'Новый чат' }])
-            .select()
-            .single();
-
-          if (chatError) throw chatError;
-          currentChatId = newChat.id;
-          if (chatTitle) chatTitle.textContent = 'Новый чат';
-          await loadChats();
-          if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
-            window.ZanGid.showToast('Новый чат создан', 'success');
-          }
-          chatIdForTitleJob = newChat.id;
-        }
-
-        // 2. Сохраняем сообщение пользователя
-        const { error: msgError } = await window.supabaseClient
-          .from('messages')
-          .insert([{ chat_id: currentChatId, role: 'user', content: text }]);
-        
-        if (msgError) throw msgError;
-
-        if (chatIdForTitleJob) {
-          const id = chatIdForTitleJob;
-          const q = text;
-          queueMicrotask(function () {
-            applyGeneratedChatTitle(id, q);
-          });
-        }
-
-        // 3. Запрос к бекэнду
-        let assistantReply = "";
-        
-        console.log(`[API REQUEST] POST ${backendUrl}/api/chat`);
-        console.log(`Request Body:`, { chat_id: currentChatId, user_id: user.id, message: text });
-        
-        if (backendUrl) {
-           const response = await fetch(`${backendUrl}/api/chat`, {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({ chat_id: currentChatId, user_id: user.id, message: text })
-           });
-           
-           if (response.ok) {
-             const result = await response.json();
-             assistantReply = result.reply || result.message || assistantReply;
-           } else {
-             console.error('Ошибка бэкенда', await response.text());
-             assistantReply = "Произошла ошибка при обращении к серверу ИИ.";
-           }
-        } else {
-           // Эмуляция ответа сервера если бэкенд пустой
-           await new Promise(r => setTimeout(r, 1000));
-           assistantReply = "Заглушка: Бэкенд пока не подключен. Мы сохранили ваш запрос в базу данных.";
-        }
-
-        // 4. Сохранение ответа в БД
-        const { error: botMsgError } = await window.supabaseClient
-          .from('messages')
-          .insert([{ chat_id: currentChatId, role: 'assistant', content: assistantReply }]);
-          
-        if (botMsgError) console.error('Ошибка сохранения ответа в БД', botMsgError);
-
-        removeTypingIndicator(typingEl);
-        appendAssistantMessage(assistantReply);
-        scrollToBottom();
-
-      } catch (err) {
-        removeTypingIndicator(typingEl);
-        console.error('Ошибка отправки сообщения:', err);
-        appendAssistantMessage('Произошла системная ошибка. Пожалуйста, попробуйте позже.');
-        scrollToBottom();
-      }
-    }
-
-    if (chatSendBtn) chatSendBtn.addEventListener('click', sendMessage);
-
-    if (chatInput) {
-      chatInput.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-          e.preventDefault();
-          sendMessage();
-        }
-      });
-    }
-
-    // --- Новый чат ---
-    if (newChatBtn) {
-      newChatBtn.addEventListener('click', function () {
-        currentChatId = null;
-        chatMessages.innerHTML = `
-          <div style="display:flex; justify-content:center; align-items:center; height:100%; color:var(--text-muted);">
-            Напишите ваш вопрос, чтобы начать новый чат
-          </div>
-        `;
-        if (chatTitle) chatTitle.textContent = 'Новый чат';
-        document.querySelectorAll('.sidebar-item').forEach(el => el.classList.remove('active'));
-        if (window.innerWidth <= 768) chatSidebar.classList.remove('open');
-      });
-    }
-
-    // Сайдбар мобайл
-    if (sidebarToggle) {
-      sidebarToggle.addEventListener('click', function () {
-        chatSidebar.classList.toggle('open');
-      });
-    }
-
-    // --- Отображение сообщений ---
-    function appendUserMessage(text) {
-      const msg = document.createElement('div');
-      msg.className = 'message user';
-      
-      const avatar = document.createElement('div');
-      avatar.className = 'message-avatar';
-      avatar.textContent = user.user_metadata?.fullname?.substring(0, 2).toUpperCase() || user.email.substring(0, 1).toUpperCase();
-
-      const bubble = document.createElement('div');
-      bubble.className = 'message-bubble';
-      bubble.textContent = text;
-
-      msg.appendChild(avatar);
-      msg.appendChild(bubble);
-      chatMessages.appendChild(msg);
-    }
-
-    function appendAssistantMessage(text) {
-      const msg = document.createElement('div');
-      msg.className = 'message bot';
-      
-      const avatar = document.createElement('div');
-      avatar.className = 'message-avatar';
-      avatar.textContent = 'ZG';
-
-      const bubble = document.createElement('div');
-      bubble.className = 'message-bubble';
-      
-      text.split('\n').forEach(line => {
-        if (line.trim()) {
-           const p = document.createElement('p');
-           p.style.marginBottom = '8px';
-           p.textContent = line;
-           bubble.appendChild(p);
-        }
-      });
-
-      msg.appendChild(avatar);
-      msg.appendChild(bubble);
-      chatMessages.appendChild(msg);
-    }
-
-    // --- Индикатор набора ---
     function showTypingIndicator() {
-      const msg = document.createElement('div');
-      msg.className = 'message bot';
-      msg.id = 'typingIndicator';
+      var message = document.createElement('article');
+      message.className = 'message assistant';
+      message.id = 'typingIndicator';
 
-      const avatar = document.createElement('div');
+      var avatar = document.createElement('div');
       avatar.className = 'message-avatar';
       avatar.textContent = 'ZG';
 
-      const bubble = document.createElement('div');
+      var card = document.createElement('div');
+      card.className = 'message-card';
+
+      var label = document.createElement('div');
+      label.className = 'message-label';
+      label.textContent = t('chat.typing');
+
+      var bubble = document.createElement('div');
       bubble.className = 'message-bubble';
+      bubble.innerHTML = '<div class="typing-dots"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>';
 
-      const dots = document.createElement('div');
-      dots.className = 'typing-dots';
-      dots.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
-
-      bubble.appendChild(dots);
-      msg.appendChild(avatar);
-      msg.appendChild(bubble);
-      chatMessages.appendChild(msg);
+      card.appendChild(label);
+      card.appendChild(bubble);
+      message.appendChild(avatar);
+      message.appendChild(card);
+      chatMessages.appendChild(message);
 
       scrollToBottom();
-      return msg;
+      return message;
     }
 
-    function removeTypingIndicator(el) {
-      if (el && el.parentNode) {
-        el.parentNode.removeChild(el);
+    function removeTypingIndicator(node) {
+      if (node && node.parentNode) {
+        node.parentNode.removeChild(node);
       }
     }
 
     function scrollToBottom() {
-      if (chatMessages) {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function autoResizeTextarea() {
+      if (!chatInput) return;
+      chatInput.style.height = 'auto';
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 180) + 'px';
+    }
+
+    function createStubReply() {
+      return {
+        type: 'structured',
+        summary: t('chat.backendStubSummary'),
+        steps: getI18nValue('chat.backendStubSteps') || [],
+        documents: getI18nValue('chat.backendStubDocuments') || [],
+        sources: getI18nValue('chat.backendStubSources') || [],
+        disclaimer: t('chat.disclaimer')
+      };
+    }
+
+    async function sendMessage() {
+      var text = String(chatInput.value || '').trim();
+      if (!text) return;
+
+      appendMessage('user', text);
+      chatInput.value = '';
+      autoResizeTextarea();
+      scrollToBottom();
+
+      var typingIndicator = showTypingIndicator();
+      var titleJobChatId = null;
+
+      try {
+        if (!currentChatId) {
+          var pendingTitle = t('common.generatingTitle');
+          var chatInsert = await window.supabaseClient
+            .from('chats')
+            .insert([{ user_id: user.id, title: pendingTitle }])
+            .select()
+            .single();
+
+          if (chatInsert.error) throw chatInsert.error;
+
+          currentChatId = chatInsert.data.id;
+          titleJobChatId = currentChatId;
+          chatsCache.unshift(chatInsert.data);
+          updateChatCacheTitle(currentChatId, pendingTitle);
+          setCurrentTitle(pendingTitle);
+          renderSidebarList();
+          window.ZanGid.showToast(t('chat.titleCreated'), 'success');
+        }
+
+        var userMessageInsert = await window.supabaseClient
+          .from('messages')
+          .insert([{ chat_id: currentChatId, role: 'user', content: text }]);
+
+        if (userMessageInsert.error) throw userMessageInsert.error;
+
+        if (titleJobChatId) {
+          var fallbackTitle = deriveFallbackTitleFromQuestion(text);
+          updateChatCacheTitle(titleJobChatId, fallbackTitle);
+          if (currentChatId === titleJobChatId) {
+            setCurrentTitle(fallbackTitle);
+          }
+          renderSidebarList();
+          persistChatTitle(titleJobChatId, fallbackTitle);
+          setTimeout(function () {
+            applyGeneratedChatTitle(titleJobChatId, text);
+          }, 0);
+        }
+
+        var assistantReply = '';
+
+        if (backendUrl) {
+          var response = await fetch(String(backendUrl).replace(/\/$/, '') + '/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: currentChatId,
+              user_id: user.id,
+              message: text
+            })
+          });
+
+          if (response.ok) {
+            var result = await response.json().catch(function () { return {}; });
+            assistantReply = result.reply !== undefined
+              ? result.reply
+              : result.message !== undefined
+                ? result.message
+                : result;
+          } else {
+            assistantReply = t('chat.systemError');
+          }
+        } else {
+          await new Promise(function (resolve) { setTimeout(resolve, 900); });
+          assistantReply = createStubReply();
+        }
+
+        var assistantInsert = await window.supabaseClient
+          .from('messages')
+          .insert([{ chat_id: currentChatId, role: 'assistant', content: serializeMessageContent(assistantReply) }]);
+
+        if (assistantInsert.error) {
+          console.error('Ошибка сохранения ответа:', assistantInsert.error);
+        }
+
+        removeTypingIndicator(typingIndicator);
+        appendMessage('assistant', assistantReply);
+        scrollToBottom();
+      } catch (error) {
+        removeTypingIndicator(typingIndicator);
+        console.error('Ошибка отправки сообщения:', error);
+        appendMessage('assistant', t('chat.systemError'));
+        scrollToBottom();
       }
     }
 
-    // Инициализация
-    await loadChats();
-    if (!currentChatId && chatTitle) {
-      chatTitle.textContent = 'Новый чат';
+    if (chatSendBtn) {
+      chatSendBtn.addEventListener('click', sendMessage);
     }
 
-    // Параметры URL: открыть чат из истории или вопрос с главной
-    const urlParams = new URLSearchParams(window.location.search);
-    const openChatId = urlParams.get('id') || urlParams.get('chat_id');
-    const queryParam = urlParams.get('q');
+    if (chatInput) {
+      chatInput.addEventListener('input', autoResizeTextarea);
+      chatInput.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+          event.preventDefault();
+          sendMessage();
+        }
+      });
+      autoResizeTextarea();
+    }
+
+    if (newChatBtn) {
+      newChatBtn.addEventListener('click', function () {
+        currentChatId = null;
+        messagesCache = [];
+        setCurrentTitle(getUntitledChatTitle());
+        renderSidebarList();
+        document.querySelectorAll('.sidebar-item').forEach(function (item) {
+          item.classList.remove('active');
+        });
+        renderEmptyChat();
+        closeSidebarOnMobile();
+      });
+    }
+
+    if (sidebarToggle) {
+      sidebarToggle.addEventListener('click', function () {
+        if (chatSidebar) {
+          chatSidebar.classList.toggle('open');
+        }
+      });
+    }
+
+    document.addEventListener('zangid:languagechange', function () {
+      renderSidebarList();
+      if (!messagesCache.length) {
+        renderEmptyChat();
+      } else {
+        rerenderMessages();
+      }
+      if (!currentChatId) {
+        setCurrentTitle(getUntitledChatTitle());
+      }
+      autoResizeTextarea();
+    });
+
+    await loadChats();
+    setCurrentTitle(getUntitledChatTitle());
+
+    var urlParams = new URLSearchParams(window.location.search);
+    var openChatId = urlParams.get('id') || urlParams.get('chat_id');
+    var queryParam = urlParams.get('q');
 
     if (openChatId) {
       try {
-        const { data: chatRow, error: openErr } = await window.supabaseClient
+        var chatRow = await window.supabaseClient
           .from('chats')
           .select('title')
           .eq('id', openChatId)
           .eq('user_id', user.id)
           .maybeSingle();
-        if (!openErr && chatRow) {
-          await loadChatMessages(openChatId, chatRow.title);
+        if (!chatRow.error && chatRow.data) {
+          await loadChatMessages(openChatId, chatRow.data.title);
         }
-      } catch (e) {
-        console.error('Ошибка открытия чата по ссылке:', e);
+      } catch (error) {
+        console.error('Ошибка открытия чата по ссылке:', error);
       }
       window.history.replaceState({}, document.title, window.location.pathname);
-    } else if (queryParam) {
-      chatInput.value = queryParam;
-      chatInput.focus();
-    } else if (!currentChatId) {
-      chatMessages.innerHTML = `
-        <div style="display:flex; justify-content:center; align-items:center; height:100%; color:var(--text-muted);">
-          Напишите ваш вопрос, чтобы начать новый чат
-        </div>
-      `;
+    } else {
+      renderEmptyChat();
+      if (queryParam && chatInput) {
+        chatInput.value = queryParam;
+        autoResizeTextarea();
+        chatInput.focus();
+      }
     }
-
   });
-
 })();

@@ -1,154 +1,89 @@
-/* ===========================
-   ZanGID — Стили «О нас»
-   =========================== */
+﻿.about-hero {
+  padding: 34px 20px 30px;
+}
 
-/* --- Шапка «О нас» --- */
-.about-hero {
-  background-color: var(--accent-dark);
-  padding: 64px 20px;
-  text-align: center;
+.about-hero-inner {
+  max-width: 1000px;
+  margin: 0 auto;
 }
 
 .about-hero h1 {
-  color: #FFFFFF;
-  font-size: 2rem;
-  margin-bottom: 12px;
+  margin-top: 16px;
+  margin-bottom: 10px;
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
 }
 
-.about-hero p {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 1.0625rem;
-  max-width: 560px;
-  margin: 0 auto;
-}
-
-/* --- Секция миссии --- */
-.mission-section {
-  padding: 60px 0;
+.mission-section,
+.about-steps,
+.about-note {
+  padding: 18px 0 10px;
 }
 
 .mission-content {
-  max-width: 720px;
+  max-width: 860px;
   margin: 0 auto;
-  text-align: center;
+  padding: 24px;
 }
 
 .mission-content h2 {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
-.mission-content p {
-  font-size: 1.0625rem;
-  line-height: 1.8;
-}
-
-/* --- Как это работает --- */
-.about-steps {
-  background-color: var(--bg-secondary);
-  padding: 60px 0;
-  transition: background-color 0.3s;
+.mission-content p + p {
+  margin-top: 12px;
 }
 
 .about-steps-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-  max-width: 900px;
-  margin: 0 auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 22px;
 }
 
 .about-step {
-  text-align: center;
-  padding: 32px 24px;
-  background-color: var(--card-bg);
+  padding: 22px;
+  border-radius: 20px;
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  transition: background-color 0.3s, border-color 0.3s;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
 }
 
-.about-step-icon {
-  width: 56px;
-  height: 56px;
-  background-color: var(--accent-light);
-  color: var(--accent-text);
+.about-step-number {
+  width: 34px;
+  height: 34px;
+  margin-bottom: 16px;
   border-radius: 50%;
+  background: var(--accent-light);
+  color: var(--accent-text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  margin-bottom: 20px;
+  font-size: 0.88rem;
+  font-weight: 800;
 }
 
 .about-step h3 {
-  font-size: 1.0625rem;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  font-size: 1.02rem;
 }
 
-.about-step p {
-  font-size: 0.9375rem;
-}
-
-/* --- Дисклеймер --- */
-.disclaimer {
-  max-width: 720px;
+.about-note-card {
+  max-width: 860px;
   margin: 0 auto;
-  padding: 60px 0;
-  text-align: center;
+  padding: 24px;
+  border-radius: 22px;
+  border: 1px solid rgba(191, 63, 70, 0.18);
+  background: rgba(191, 63, 70, 0.05);
 }
 
-.disclaimer-card {
-  background-color: #FFF8E6;
-  border: 1px solid #F0DDA0;
-  border-radius: var(--radius-md);
-  padding: 28px 32px;
+.about-note-card h3 {
+  margin-bottom: 10px;
 }
 
-body.dark .disclaimer-card {
-  background-color: #2A2518;
-  border-color: #3A3020;
-}
-
-.disclaimer-icon {
-  font-size: 1.75rem;
-  margin-bottom: 12px;
-}
-
-.disclaimer-card h3 {
-  font-size: 1.0625rem;
-  margin-bottom: 8px;
-  color: #8B6B00;
-}
-
-body.dark .disclaimer-card h3 {
-  color: #D4A800;
-}
-
-.disclaimer-card p {
-  font-size: 0.9375rem;
-  color: #6B5A20;
-  line-height: 1.7;
-}
-
-body.dark .disclaimer-card p {
-  color: #B0A060;
-}
-
-/* --- Адаптивность --- */
-@media (max-width: 768px) {
-  .about-hero {
-    padding: 48px 20px;
-  }
-
-  .about-hero h1 {
-    font-size: 1.5rem;
-  }
-
+@media (max-width: 760px) {
   .about-steps-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .disclaimer-card {
-    padding: 24px 20px;
   }
 }

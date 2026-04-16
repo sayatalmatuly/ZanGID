@@ -1,215 +1,246 @@
-/**
- * ZanGID — Логика дашборда
- * Загрузка статистики, недавних чатов и Onboarding Popup
- */
-
-(function () {
+﻿(function () {
   'use strict';
 
   document.addEventListener('DOMContentLoaded', async function () {
     if (!window.supabaseClient) return;
 
-    const { data: { session } } = await window.supabaseClient.auth.getSession();
-    if (!session) return; // app.js handles redirect
+    var sessionData = await window.supabaseClient.auth.getSession();
+    var session = sessionData && sessionData.data ? sessionData.data.session : null;
+    if (!session) return;
 
-    const user = session.user;
+    var user = session.user;
+    var recentChatsCache = [];
+    var selectedCity = '';
+    var currentGreetingName = '';
 
-    // Элементы
-    const dashboardGreeting = document.getElementById('dashboardGreeting');
-    const statQuestions = document.getElementById('statQuestions');
-    const statChats = document.getElementById('statChats');
-    const statDays = document.getElementById('statDays');
-    const recentRequestsList = document.getElementById('recentRequestsList');
+    var dashboardGreeting = document.getElementById('dashboardGreeting');
+    var statQuestions = document.getElementById('statQuestions');
+    var statChats = document.getElementById('statChats');
+    var statDays = document.getElementById('statDays');
+    var recentRequestsList = document.getElementById('recentRequestsList');
+    var suggestionsList = document.getElementById('suggestionsList');
 
-    // Onboarding Elements
-    const onboardingPopup = document.getElementById('onboardingPopup');
-    const onboardingName = document.getElementById('onboardingName');
-    const cityChips = document.querySelectorAll('.city-chip');
-    const otherCityBtn = document.getElementById('otherCityBtn');
-    const onboardingOtherCity = document.getElementById('onboardingOtherCity');
-    const onboardingSubmit = document.getElementById('onboardingSubmit');
+    var onboardingPopup = document.getElementById('onboardingPopup');
+    var onboardingName = document.getElementById('onboardingName');
+    var cityChips = document.querySelectorAll('.city-chip');
+    var otherCityBtn = document.getElementById('otherCityBtn');
+    var onboardingOtherCity = document.getElementById('onboardingOtherCity');
+    var onboardingSubmit = document.getElementById('onboardingSubmit');
 
-    let selectedCity = '';
-
-    try {
-      // 1. Проверяем профиль пользователя (Onboarding)
-      let { data: profile, error } = await window.supabaseClient
-        .from('users')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      
-      const userFullName = profile?.name || session.user.user_metadata?.fullname || session.user.user_metadata?.full_name || session.user.email.split('@')[0];
-
-      if (dashboardGreeting) {
-        dashboardGreeting.textContent = `С возвращением, ${userFullName}! 👋`;
-        dashboardGreeting.classList.remove('user-identity-pending');
-      }
-      if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
-        window.ZanGid.showToast('Добро пожаловать!', 'success');
-      }
-
-      if (!profile || !profile.name) {
-        // Показать онбординг, так как имя отсутствует
-        if (onboardingName) {
-           onboardingName.value = userFullName !== session.user.email.split('@')[0] ? userFullName : '';
-        }
-        onboardingPopup.classList.add('show');
-      }
-
-      // 2. Статистика
-      // Задано вопросов (сообщения от пользователя)
-      let { count: msgsCount, error: msgErr } = await window.supabaseClient
-        .from('messages')
-        .select('chats!inner(user_id)', { count: 'exact', head: true })
-        .eq('role', 'user')
-        .eq('chats.user_id', user.id);
-      
-      if (!msgErr && statQuestions) statQuestions.textContent = msgsCount || 0;
-
-      // Активных чатов
-      let { count: chatsCount, error: chatsCountErr } = await window.supabaseClient
-        .from('chats')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-
-      if (!chatsCountErr && statChats) statChats.textContent = chatsCount || 0;
-
-      // Дней с нами (разница между created_at и сегодня)
-      if (statDays) {
-        const userCreatedAt = new Date(user.created_at);
-        const diffTime = Math.abs(new Date() - userCreatedAt);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        statDays.textContent = diffDays;
-      }
-
-      // 3. Недавние запросы
-      let { data: recentChats, error: chatsErr } = await window.supabaseClient
-        .from('chats')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      if (!chatsErr && recentRequestsList) {
-        recentRequestsList.innerHTML = '';
-        if (recentChats && recentChats.length > 0) {
-          recentChats.forEach(chat => {
-            const date = new Date(chat.created_at);
-            const dateString = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-            
-            const a = document.createElement('a');
-            a.href = `chat.html?chat_id=${chat.id}`;
-            a.className = 'recent-item';
-            a.innerHTML = `
-              <div class="recent-item-main">
-                <div class="recent-icon">💬</div>
-                <div>
-                  <div class="recent-title">${chat.title || 'Новый чат'}</div>
-                  <div class="recent-meta">
-                    <span>${dateString}</span>
-                  </div>
-                </div>
-              </div>
-              <div class="recent-action">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </div>
-            `;
-            // Для совместимости мы просто отправляем в chat.html, по ТЗ `chat.html?q=` работает, 
-            // но мы можем и без параметра, чат в сайдбаре загрузится.
-            recentRequestsList.appendChild(a);
-          });
-        } else {
-          recentRequestsList.innerHTML = `
-            <div style="padding: 32px 20px; text-align: center;">
-              <div style="font-size: 2rem; margin-bottom: 12px; color: var(--text-muted);">🔍</div>
-              <h4 style="margin-bottom: 4px; font-weight: 500;">Вы ещё ничем не интересовались</h4>
-              <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 16px;">Вся история ваших запросов будет сохранена здесь</p>
-              <a href="chat.html" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.875rem;">Задать первый вопрос</a>
-            </div>
-          `;
-        }
-      }
-
-    } catch (err) {
-      console.error('Ошибка дашборда:', err);
-      if (dashboardGreeting) {
-        dashboardGreeting.textContent = 'С возвращением! 👋';
-        dashboardGreeting.classList.remove('user-identity-pending');
-      }
+    function t(key, vars) {
+      return window.ZanGid.t(key, vars);
     }
 
-    // --- Onboarding Logic ---
-    cityChips.forEach(btn => {
-      btn.addEventListener('click', () => {
-        // Убираем активный класс со всех
-        cityChips.forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        
-        if (btn.id === 'otherCityBtn') {
-          onboardingOtherCity.style.display = 'block';
-          selectedCity = onboardingOtherCity.value;
-        } else {
-          onboardingOtherCity.style.display = 'none';
-          selectedCity = btn.textContent;
-        }
+    function getData(key) {
+      return window.ZanGidI18n.get(key, window.ZanGid.getLanguage());
+    }
+
+    function renderSuggestions() {
+      if (!suggestionsList) return;
+      suggestionsList.innerHTML = '';
+      (getData('dashboard.suggestions') || []).forEach(function (item) {
+        var link = document.createElement('a');
+        link.className = 'suggestion-chip';
+        link.href = 'chat.html?q=' + encodeURIComponent(item.query);
+        link.textContent = item.label;
+        suggestionsList.appendChild(link);
       });
-    });
+    }
 
-    onboardingOtherCity.addEventListener('input', (e) => {
-      if (otherCityBtn.classList.contains('active')) {
-        selectedCity = e.target.value.trim();
-      }
-    });
+    function renderCityChips() {
+      cityChips.forEach(function (button) {
+        var cityKey = button.dataset.city;
+        button.textContent = t('common.cities.' + cityKey);
+      });
+    }
 
-    onboardingSubmit.addEventListener('click', async () => {
-      const name = onboardingName.value.trim();
-      if (!name) {
-        if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
-          window.ZanGid.showToast('Пожалуйста, введите ваше имя', 'info');
-        }
+    function renderRecentLoading() {
+      recentRequestsList.innerHTML = window.ZanGid.createSkeletonMarkup(3, 'row');
+    }
+
+    function renderRecentList() {
+      if (!recentChatsCache.length) {
+        recentRequestsList.innerHTML = window.ZanGid.createStateMarkup({
+          type: 'empty',
+          title: t('dashboard.recentEmptyTitle'),
+          text: t('dashboard.recentEmptyText'),
+          actionHref: 'chat.html',
+          actionLabel: t('dashboard.firstQuestion')
+        });
         return;
       }
 
-      onboardingSubmit.textContent = 'Сохранение...';
+      recentRequestsList.innerHTML = '';
+      recentChatsCache.forEach(function (chat) {
+        var card = document.createElement('a');
+        card.href = 'chat.html?chat_id=' + encodeURIComponent(chat.id);
+        card.className = 'recent-item';
+        card.innerHTML =
+          '<div class="recent-item-main">' +
+            '<div class="recent-icon">ZG</div>' +
+            '<div class="recent-copy">' +
+              '<div class="recent-title"></div>' +
+              '<div class="recent-meta"></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="recent-action">→</div>';
+        card.querySelector('.recent-title').textContent = chat.title || t('common.untitledChat');
+        card.querySelector('.recent-meta').textContent = window.ZanGid.formatDate(chat.created_at, {
+          day: 'numeric',
+          month: 'short',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        recentRequestsList.appendChild(card);
+      });
+    }
+
+    function setGreeting(name) {
+      if (!dashboardGreeting) return;
+      currentGreetingName = String(name || '').trim();
+      dashboardGreeting.textContent = t('dashboard.greetingFallback', { name: name });
+      dashboardGreeting.classList.remove('user-identity-pending');
+    }
+
+    function bindCityChips() {
+      cityChips.forEach(function (button) {
+        if (button.dataset.bound === 'true') return;
+        button.dataset.bound = 'true';
+        button.addEventListener('click', function () {
+          cityChips.forEach(function (chip) {
+            chip.classList.remove('active');
+          });
+          button.classList.add('active');
+          if (button === otherCityBtn) {
+            onboardingOtherCity.style.display = 'block';
+            selectedCity = onboardingOtherCity.value.trim();
+          } else {
+            onboardingOtherCity.style.display = 'none';
+            selectedCity = button.dataset.city;
+          }
+        });
+      });
+    }
+
+    onboardingOtherCity.addEventListener('input', function () {
+      if (otherCityBtn.classList.contains('active')) {
+        selectedCity = onboardingOtherCity.value.trim();
+      }
+    });
+
+    onboardingSubmit.addEventListener('click', async function () {
+      var name = String(onboardingName.value || '').trim();
+      if (!name) {
+        window.ZanGid.showToast(t('dashboard.onboardingNameRequired'), 'info');
+        return;
+      }
+
       onboardingSubmit.disabled = true;
+      onboardingSubmit.textContent = t('dashboard.onboardingSaving');
 
       try {
-        const { error } = await window.supabaseClient.from('users').upsert({
+        var response = await window.supabaseClient.from('users').upsert({
           id: user.id,
           name: name,
           city: selectedCity || null,
           updated_at: new Date().toISOString()
         }, { onConflict: 'id' });
-        
-        if (error) throw error;
 
-        // Успешно сохранено
+        if (response.error) throw response.error;
+
         onboardingPopup.classList.remove('show');
-        if (dashboardGreeting) {
-          dashboardGreeting.textContent = `С возвращением, ${name}! 👋`;
-        }
-        document.querySelectorAll('.dropdown-name').forEach(function (el) {
-          el.textContent = name;
-          el.classList.remove('user-identity-pending');
+        setGreeting(name);
+        document.querySelectorAll('.dropdown-name').forEach(function (node) {
+          node.textContent = name;
+          node.classList.remove('user-identity-pending');
         });
-        document.querySelectorAll('.user-avatar').forEach(function (el) {
-          el.textContent = name.substring(0, 2).toUpperCase();
-          el.classList.remove('user-identity-pending');
+        document.querySelectorAll('.user-avatar').forEach(function (node) {
+          node.textContent = window.ZanGid.getInitials(name);
+          node.classList.remove('user-identity-pending');
         });
-        
-      } catch (err) {
-        console.error('Ошибка сохранения профиля:', err);
-        if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
-          window.ZanGid.showToast('Произошла ошибка при сохранении данных', 'error');
-        }
+        window.ZanGid.showToast(t('dashboard.onboardingSaved'), 'success');
+      } catch (error) {
+        console.error('Ошибка сохранения профиля:', error);
+        window.ZanGid.showToast(t('profile.saveError'), 'error');
       } finally {
-        onboardingSubmit.textContent = 'Продолжить';
         onboardingSubmit.disabled = false;
+        onboardingSubmit.textContent = t('dashboard.onboardingSubmit');
       }
     });
 
+    document.addEventListener('zangid:languagechange', function () {
+      renderSuggestions();
+      renderCityChips();
+      renderRecentList();
+      if (currentGreetingName) {
+        setGreeting(currentGreetingName);
+      }
+      if (!onboardingSubmit.disabled) {
+        onboardingSubmit.textContent = t('dashboard.onboardingSubmit');
+      }
+      if (!selectedCity && otherCityBtn && otherCityBtn.classList.contains('active')) {
+        selectedCity = onboardingOtherCity.value.trim();
+      }
+    });
+
+    bindCityChips();
+    renderCityChips();
+    renderSuggestions();
+    renderRecentLoading();
+
+    try {
+      var profileResponse = await window.supabaseClient
+        .from('users')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      var profile = profileResponse.data || null;
+      var userFullName = (profile && profile.name) || user.user_metadata?.fullname || user.user_metadata?.full_name || user.email.split('@')[0];
+      setGreeting(userFullName);
+
+      if (!profile || !profile.name) {
+        if (onboardingName) {
+          onboardingName.value = userFullName !== user.email.split('@')[0] ? userFullName : '';
+        }
+        onboardingPopup.classList.add('show');
+      }
+
+      var messagesCountResponse = await window.supabaseClient
+        .from('messages')
+        .select('chats!inner(user_id)', { count: 'exact', head: true })
+        .eq('role', 'user')
+        .eq('chats.user_id', user.id);
+      statQuestions.textContent = messagesCountResponse.count || 0;
+
+      var chatsCountResponse = await window.supabaseClient
+        .from('chats')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      statChats.textContent = chatsCountResponse.count || 0;
+
+      var diffTime = Math.abs(new Date() - new Date(user.created_at));
+      statDays.textContent = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+      var recentResponse = await window.supabaseClient
+        .from('chats')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(4);
+
+      recentChatsCache = recentResponse.data || [];
+      renderRecentList();
+    } catch (error) {
+      console.error('Ошибка дашборда:', error);
+      setGreeting(user.email.split('@')[0]);
+      recentRequestsList.innerHTML = window.ZanGid.createStateMarkup({
+        type: 'error',
+        title: t('dashboard.recentErrorTitle'),
+        text: t('dashboard.recentErrorText'),
+        actionHref: 'chat.html',
+        actionLabel: t('nav.newChat')
+      });
+    }
   });
 })();

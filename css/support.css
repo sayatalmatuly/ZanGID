@@ -1,91 +1,67 @@
-/* ===========================
-   ZanGID — Стили поддержки
-   =========================== */
+﻿.support-hero {
+  padding: 34px 20px 30px;
+}
 
-/* --- Шапка --- */
-.support-hero {
-  background-color: var(--accent-dark);
-  padding: 64px 20px;
-  text-align: center;
+.support-hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .support-hero h1 {
-  color: #FFFFFF;
-  font-size: 2rem;
-  margin-bottom: 12px;
+  margin-top: 16px;
+  margin-bottom: 10px;
+  font-size: clamp(2rem, 4vw, 2.6rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
 }
 
-.support-hero p {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 1.0625rem;
-  max-width: 520px;
-  margin: 0 auto;
-}
-
-/* --- Контент --- */
 .support-content {
-  max-width: 720px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 60px 20px;
+  padding: 0 20px 20px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 420px);
+  gap: 18px;
 }
 
-/* --- FAQ --- */
-.faq-section {
-  margin-bottom: 60px;
+.faq-section h2,
+.contact-section h2 {
+  margin-bottom: 16px;
+  font-size: 1.2rem;
 }
 
-.faq-section h2 {
-  margin-bottom: 24px;
+.faq-list {
+  display: grid;
+  gap: 10px;
 }
 
 .faq-item {
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  margin-bottom: 10px;
-  transition: border-color 0.15s;
+  border-radius: 18px;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
-}
-
-.faq-item:hover {
-  border-color: var(--accent);
 }
 
 .faq-question {
   width: 100%;
-  padding: 18px 20px;
-  background-color: transparent;
-  color: var(--text-primary);
-  font-size: 0.9375rem;
-  font-weight: 600;
-  text-align: left;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  cursor: pointer;
-  transition: background-color 0.15s;
-}
-
-.faq-question:hover {
-  background-color: var(--bg-secondary);
-}
-
-.faq-arrow {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  transition: transform 0.2s;
-  flex-shrink: 0;
-}
-
-.faq-item.open .faq-arrow {
-  transform: rotate(180deg);
+  padding: 16px 18px;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  font-size: 0.96rem;
+  font-weight: 600;
 }
 
 .faq-answer {
   display: none;
-  padding: 0 20px 18px;
-  font-size: 0.9375rem;
+  padding: 0 18px 18px;
   color: var(--text-secondary);
+  font-size: 0.92rem;
   line-height: 1.7;
 }
 
@@ -93,86 +69,61 @@
   display: block;
 }
 
-/* --- Форма обратной связи --- */
-.contact-section h2 {
-  margin-bottom: 24px;
+.faq-item.open .faq-arrow {
+  transform: rotate(180deg);
+}
+
+.contact-section {
+  padding: 22px;
+  align-self: start;
 }
 
 .contact-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: grid;
+  gap: 14px;
 }
 
 .contact-form .form-group {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 6px;
 }
 
 .contact-form .form-label {
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-primary);
 }
 
 .contact-form .form-input {
   width: 100%;
-  padding: 12px 16px;
-  background-color: var(--input-bg);
+  min-height: 46px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--input-border);
+  background: var(--bg-secondary);
   color: var(--text-primary);
-  border: 1.5px solid var(--input-border);
-  border-radius: var(--radius-sm);
-  font-size: 0.9375rem;
-  transition: border-color 0.15s;
-}
-
-.contact-form .form-input:focus {
-  border-color: var(--accent);
 }
 
 .contact-form textarea.form-input {
-  min-height: 120px;
+  min-height: 130px;
   resize: vertical;
 }
 
-.contact-form .btn {
-  align-self: flex-start;
-}
-
-/* Контактный email */
 .contact-email {
-  margin-top: 32px;
-  padding: 20px 24px;
-  background-color: var(--bg-secondary);
-  border-radius: var(--radius-sm);
-  transition: background-color 0.3s;
+  margin-top: 16px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
-.contact-email p {
-  font-size: 0.9375rem;
-  color: var(--text-secondary);
+.contact-status {
+  margin-top: 16px;
 }
 
-.contact-email a {
-  font-weight: 600;
+.contact-status:empty {
+  display: none;
 }
 
-/* --- Адаптивность --- */
-@media (max-width: 768px) {
-  .support-hero {
-    padding: 48px 20px;
-  }
-
-  .support-hero h1 {
-    font-size: 1.5rem;
-  }
-
+@media (max-width: 920px) {
   .support-content {
-    padding: 40px 20px;
-  }
-
-  .contact-form .btn {
-    width: 100%;
+    grid-template-columns: 1fr;
   }
 }

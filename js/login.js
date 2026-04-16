@@ -1,13 +1,7 @@
-/**
- * ZanGID — Логика входа / регистрации
- * Переключение между формами, показ пароля
- */
-
-(function () {
+﻿(function () {
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
-
     var loginForm = document.getElementById('loginForm');
     var loginBtn = document.getElementById('loginBtn');
     var loginTitle = document.getElementById('loginTitle');
@@ -21,120 +15,107 @@
     var togglePassword = document.getElementById('togglePassword');
     var googleBtn = document.getElementById('googleBtn');
 
-    // Текущий режим: 'login' или 'register'
     var mode = 'login';
 
-    // --- Переключение между входом и регистрацией ---
-    if (switchLink) {
-      switchLink.addEventListener('click', function (e) {
-        e.preventDefault();
+    function t(key) {
+      return window.ZanGid.t(key);
+    }
 
+    function renderMode() {
+      if (mode === 'login') {
+        loginTitle.textContent = t('login.title');
+        loginSubtitle.textContent = t('login.subtitle');
+        loginBtn.textContent = t('login.submitLogin');
+        switchText.textContent = t('login.switchRegisterText');
+        switchLink.textContent = t('login.switchRegisterLink');
+        nameGroup.classList.add('hidden');
+      } else {
+        loginTitle.textContent = t('login.registerTitle');
+        loginSubtitle.textContent = t('login.registerSubtitle');
+        loginBtn.textContent = t('login.submitRegister');
+        switchText.textContent = t('login.switchLoginText');
+        switchLink.textContent = t('login.switchLoginLink');
+        nameGroup.classList.remove('hidden');
+      }
+    }
+
+    switchLink.addEventListener('click', function (event) {
+      event.preventDefault();
+      mode = mode === 'login' ? 'register' : 'login';
+      renderMode();
+    });
+
+    togglePassword.addEventListener('click', function () {
+      var isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      togglePassword.title = isPassword ? t('login.hidePassword') : t('login.showPassword');
+    });
+
+    document.addEventListener('zangid:languagechange', function () {
+      renderMode();
+      togglePassword.title = passwordInput.type === 'password' ? t('login.showPassword') : t('login.hidePassword');
+    });
+
+    loginForm.addEventListener('submit', async function (event) {
+      event.preventDefault();
+
+      var email = String(emailInput.value || '').trim();
+      var password = String(passwordInput.value || '').trim();
+      if (!email || !password) return;
+
+      if (!window.supabaseClient) {
+        window.ZanGid.showToast(t('login.supabaseMissing'), 'error');
+        return;
+      }
+
+      var originalText = loginBtn.textContent;
+      loginBtn.textContent = t('login.loading');
+      loginBtn.disabled = true;
+
+      try {
         if (mode === 'login') {
-          mode = 'register';
-          loginTitle.textContent = 'Создать аккаунт';
-          loginSubtitle.textContent = 'Бесплатная регистрация за 30 секунд';
-          loginBtn.textContent = 'Зарегистрироваться';
-          nameGroup.classList.remove('hidden');
-          switchText.textContent = 'Уже есть аккаунт?';
-          switchLink.textContent = 'Войти';
+          var loginResponse = await window.supabaseClient.auth.signInWithPassword({ email: email, password: password });
+          if (loginResponse.error) throw loginResponse.error;
+          window.location.href = 'dashboard.html';
         } else {
-          mode = 'login';
-          loginTitle.textContent = 'Войти в ZanGID';
-          loginSubtitle.textContent = 'Получите доступ к AI-навигатору по законам';
-          loginBtn.textContent = 'Войти';
-          nameGroup.classList.add('hidden');
-          switchText.textContent = 'Нет аккаунта?';
-          switchLink.textContent = 'Зарегистрироваться';
-        }
-      });
-    }
-
-    // --- Показать / скрыть пароль ---
-    if (togglePassword) {
-      togglePassword.addEventListener('click', function () {
-        if (passwordInput.type === 'password') {
-          passwordInput.type = 'text';
-          togglePassword.title = 'Скрыть пароль';
-        } else {
-          passwordInput.type = 'password';
-          togglePassword.title = 'Показать пароль';
-        }
-      });
-    }
-
-    // --- Отправка формы ---
-    if (loginForm) {
-      loginForm.addEventListener('submit', async function (e) {
-        e.preventDefault();
-
-        var email = emailInput.value.trim();
-        var password = passwordInput.value.trim();
-
-        if (!email || !password) return;
-        
-        if (!window.supabaseClient) {
-          if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
-            window.ZanGid.showToast('Ошибка конфигурации Supabase. Клиент не инициализирован.', 'error');
-          }
-          return;
-        }
-
-        const submitBtn = loginForm.querySelector('button[type="submit"]');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Загрузка...';
-        submitBtn.disabled = true;
-
-        try {
-          if (mode === 'login') {
-            const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) throw error;
-            console.log('Вход успешен:', data);
-            window.location.href = 'dashboard.html';
-          } else {
-            var name = nameInput.value.trim();
-            const { data, error } = await window.supabaseClient.auth.signUp({
-              email,
-              password,
-              options: {
-                data: { fullname: name }
-              }
-            });
-            if (error) throw error;
-            console.log('Регистрация успешна:', data);
-            window.location.href = 'dashboard.html';
-          }
-        } catch (error) {
-          console.error('Ошибка авторизации:', error);
-          if (window.ZanGid && typeof window.ZanGid.showToast === 'function') {
-            window.ZanGid.showToast(
-              error.message === 'Invalid login credentials' ? 'Неверный email или пароль' : (error.message || 'Ошибка'),
-              'error'
-            );
-          }
-        } finally {
-          submitBtn.textContent = originalText;
-          submitBtn.disabled = false;
-        }
-      });
-    }
-
-    // --- Google OAuth ---
-    if (googleBtn) {
-      googleBtn.addEventListener('click', async function () {
-        if (!window.supabaseClient) return;
-        try {
-          await window.supabaseClient.auth.signInWithOAuth({ 
-            provider: 'google',
+          var name = String(nameInput.value || '').trim();
+          var registerResponse = await window.supabaseClient.auth.signUp({
+            email: email,
+            password: password,
             options: {
-              redirectTo: window.location.origin + '/dashboard.html'
+              data: { fullname: name }
             }
           });
-        } catch(e) {
-          console.error('Ошибка Google Auth', e);
+          if (registerResponse.error) throw registerResponse.error;
+          window.location.href = 'dashboard.html';
         }
-      });
-    }
+      } catch (error) {
+        console.error('Ошибка авторизации:', error);
+        window.ZanGid.showToast(
+          error.message === 'Invalid login credentials' ? t('login.invalidCredentials') : (error.message || t('common.unknownError')),
+          'error'
+        );
+      } finally {
+        loginBtn.textContent = originalText;
+        loginBtn.disabled = false;
+      }
+    });
 
+    googleBtn.addEventListener('click', async function () {
+      if (!window.supabaseClient) return;
+      try {
+        await window.supabaseClient.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + '/dashboard.html'
+          }
+        });
+      } catch (error) {
+        console.error('Ошибка Google Auth:', error);
+      }
+    });
+
+    renderMode();
+    togglePassword.title = t('login.showPassword');
   });
-
 })();

@@ -1,138 +1,79 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ZanGID — История запросов">
+  <meta name="description" content="История чатов ZanGID.">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 64 78' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='32' cy='46' r='28' stroke='%231D9E75' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='46' r='2.5' fill='%231D9E75'/%3E%3C/svg%3E">
   <title>ZanGID — История чатов</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/ui.css">
   <link rel="stylesheet" href="css/history.css">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
+  <script src="js/i18n.js"></script>
 </head>
-
 <body>
-
-  <!-- Навбар -->
   <nav class="navbar" id="navbar">
     <div class="navbar-inner">
-      <a href="index.html" class="navbar-logo">
-        <div class="navbar-logo-icon">
-          <svg viewBox="0 0 64 78" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="26" y="1" width="12" height="8" rx="2" stroke-width="2.5"/>
-              <line x1="27" y1="3.5" x2="37" y2="3.5" stroke-width="1.2"/>
-              <line x1="27" y1="6" x2="37" y2="6" stroke-width="1.2"/>
-              <path d="M29 9 Q29 16 32 16 Q35 16 35 9" stroke-width="2" fill="none"/>
-              <circle cx="32" cy="46" r="28" stroke-width="2.5"/>
-              <circle cx="32" cy="46" r="21" stroke-width="1.8"/>
-              <g transform="rotate(45, 32, 46)">
-                <path d="M32 32 L39 46 L32 60 L25 46 Z" stroke-width="1.8" fill="none"/>
-              </g>
-              <circle cx="32" cy="46" r="2.5" fill="currentColor" stroke="none"/>
-              <line x1="32" y1="18" x2="32" y2="25" stroke-width="2"/>
-              <line x1="32" y1="67" x2="32" y2="74" stroke-width="2"/>
-              <line x1="4" y1="46" x2="11" y2="46" stroke-width="2"/>
-              <line x1="53" y1="46" x2="60" y2="46" stroke-width="2"/>
-            </g>
-          </svg>
-        </div>
-        ZanGID
-      </a>
-
+      <a href="index.html" class="navbar-logo"><div class="navbar-logo-icon"><svg viewBox="0 0 64 78" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="26" y="1" width="12" height="8" rx="2" stroke-width="2.5"/><line x1="27" y1="3.5" x2="37" y2="3.5" stroke-width="1.2"/><line x1="27" y1="6" x2="37" y2="6" stroke-width="1.2"/><path d="M29 9 Q29 16 32 16 Q35 16 35 9" stroke-width="2" fill="none"/><circle cx="32" cy="46" r="28" stroke-width="2.5"/><circle cx="32" cy="46" r="21" stroke-width="1.8"/><g transform="rotate(45, 32, 46)"><path d="M32 32 L39 46 L32 60 L25 46 Z" stroke-width="1.8" fill="none"/></g><circle cx="32" cy="46" r="2.5" fill="currentColor" stroke="none"/><line x1="32" y1="18" x2="32" y2="25" stroke-width="2"/><line x1="32" y1="67" x2="32" y2="74" stroke-width="2"/><line x1="4" y1="46" x2="11" y2="46" stroke-width="2"/><line x1="53" y1="46" x2="60" y2="46" stroke-width="2"/></g></svg></div><span>ZanGID</span></a>
       <div class="navbar-nav" id="navbarNav">
-        <a href="dashboard.html" class="navbar-link auth-user">Дашборд</a>
-        <a href="about.html" class="navbar-link">О нас</a>
-        <a href="support.html" class="navbar-link">Поддержка</a>
+        <a href="dashboard.html" class="navbar-link auth-user"><span data-i18n="nav.dashboard">Дашборд</span></a>
+        <a href="about.html" class="navbar-link"><span data-i18n="nav.about">О нас</span></a>
+        <a href="support.html" class="navbar-link"><span data-i18n="nav.support">Поддержка</span></a>
       </div>
-
       <div class="navbar-actions">
-        <a href="login.html" class="btn btn-outline auth-guest" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Войти</a>
-        <a href="chat.html" class="btn btn-primary auth-user" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Новый чат</a>
-        <!-- Пользовательское меню -->
+        <a href="login.html" class="btn btn-outline auth-guest"><span data-i18n="nav.login">Войти</span></a>
+        <a href="chat.html" class="btn btn-primary auth-user"><span data-i18n="nav.newChat">Новый чат</span></a>
         <div class="user-menu auth-user">
-          <button class="user-menu-btn" id="userMenuBtn">
-            <div class="user-avatar user-identity-pending">…</div>
-          </button>
+          <button class="user-menu-btn" id="userMenuBtn" type="button"><div class="user-avatar user-identity-pending">…</div></button>
           <div class="user-dropdown" id="userDropdown">
-            <div class="dropdown-header">
-              <div class="dropdown-name user-identity-pending">…</div>
-              <div class="dropdown-email user-identity-pending">…</div>
-            </div>
-            <a href="dashboard.html" class="dropdown-item">
-              <span class="dropdown-icon">📊</span> Панель управления
-            </a>
-            <a href="history.html" class="dropdown-item">
-              <span class="dropdown-icon">🕒</span> История чатов
-            </a>
-            <a href="profile.html" class="dropdown-item">
-              <span class="dropdown-icon">⚙️</span> Настройки
-            </a>
+            <div class="dropdown-header"><div class="dropdown-name user-identity-pending">…</div><div class="dropdown-email user-identity-pending">…</div></div>
+            <a href="dashboard.html" class="dropdown-item"><span class="dropdown-icon">•</span><span data-i18n="dropdown.panel">Панель управления</span></a>
+            <a href="history.html" class="dropdown-item"><span class="dropdown-icon">•</span><span data-i18n="dropdown.history">История чатов</span></a>
+            <a href="profile.html" class="dropdown-item"><span class="dropdown-icon">•</span><span data-i18n="dropdown.settings">Настройки</span></a>
             <div class="dropdown-divider"></div>
-            <a href="index.html" class="dropdown-item text-danger logout-btn">
-              <span class="dropdown-icon">🚪</span> Выйти
-            </a>
+            <a href="index.html" class="dropdown-item text-danger logout-btn"><span class="dropdown-icon">•</span><span data-i18n="dropdown.logout">Выйти</span></a>
           </div>
         </div>
-        <button class="burger-btn" id="burgerBtn" aria-label="Меню">
-          <div class="burger-icon">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </button>
+        <button class="burger-btn" id="burgerBtn" type="button" data-i18n-aria-label="nav.menu" aria-label="Меню"><div class="burger-icon"><span></span><span></span><span></span></div></button>
       </div>
     </div>
   </nav>
 
-  <!-- Мобильное меню -->
   <div class="mobile-menu" id="mobileMenu">
-    <a href="dashboard.html" class="navbar-link auth-user">Дашборд</a>
-    <a href="about.html" class="navbar-link">О нас</a>
-    <a href="support.html" class="navbar-link">Поддержка</a>
+    <a href="dashboard.html" class="navbar-link auth-user"><span data-i18n="nav.dashboard">Дашборд</span></a>
+    <a href="about.html" class="navbar-link"><span data-i18n="nav.about">О нас</span></a>
+    <a href="support.html" class="navbar-link"><span data-i18n="nav.support">Поддержка</span></a>
   </div>
 
   <section class="history-header">
     <div class="history-header-inner">
-      <h1>История чатов</h1>
-      <div class="history-search" style="margin-top: 16px;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
-        <input type="text" placeholder="Поиск по запросам и документам">
+      <div>
+        <div class="eyebrow"><span data-i18n="dropdown.history">История чатов</span></div>
+        <h1 data-i18n="history.title">История чатов</h1>
+        <p data-i18n="history.subtitle">Поиск по запросам и быстрый возврат к предыдущим диалогам.</p>
+      </div>
+      <div class="history-search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="historySearchInput" data-i18n-placeholder="history.searchPlaceholder" placeholder="Поиск по теме, формулировке вопроса или документам">
       </div>
     </div>
   </section>
 
   <div class="history-content">
-    <div class="history-filters">
-      <span class="chip active">Все</span>
-      <span class="chip">Недвижимость</span>
-      <span class="chip">Бизнес</span>
-      <span class="chip">Трудовые споры</span>
-    </div>
-
-    <div class="history-timeline" id="historyTimeline">
-      <div class="history-loading" id="historyLoading">Загрузка…</div>
-    </div>
+    <div class="history-filters" id="historyFilters"></div>
+    <div class="history-timeline" id="historyTimeline"></div>
   </div>
 
-  <!-- Футер -->
   <footer class="footer">
     <div class="footer-inner">
-      <span class="footer-copy">© 2026 ZanGID. Все права защищены.</span>
-      <div class="footer-links">
-        <a href="about.html">О нас</a>
-        <a href="support.html">Поддержка</a>
-      </div>
+      <span class="footer-copy" data-i18n="footer.copyright">© 2026 ZanGID. Все права защищены.</span>
+      <div class="footer-links"><a href="about.html" data-i18n="footer.about">О нас</a><a href="support.html" data-i18n="footer.support">Поддержка</a></div>
     </div>
   </footer>
 
-  <script src="js/app.js"></script>
+  <script src="js/runtime.js"></script>
   <script src="js/history.js"></script>
 </body>
-
 </html>

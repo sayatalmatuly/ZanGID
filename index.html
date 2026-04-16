@@ -1,22 +1,19 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description"
-    content="ZanGID — AI-навигатор по законодательству Казахстана. Получите ответы на юридические вопросы простым языком.">
+  <meta name="description" content="ZanGID — AI-юридический навигатор по законодательству Казахстана.">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 64 78' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='32' cy='46' r='28' stroke='%231D9E75' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='46' r='2.5' fill='%231D9E75'/%3E%3C/svg%3E">
-  <title>ZanGID — AI-навигатор по законодательству</title>
+  <title>ZanGID — AI-юридический навигатор</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/ui.css">
   <link rel="stylesheet" href="css/index.css">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
+  <script src="js/i18n.js"></script>
 </head>
-
 <body>
-
-  <!-- Навбар -->
   <nav class="navbar" id="navbar">
     <div class="navbar-inner">
       <a href="index.html" class="navbar-logo">
@@ -40,21 +37,20 @@
             </g>
           </svg>
         </div>
-        ZanGID
+        <span>ZanGID</span>
       </a>
 
       <div class="navbar-nav" id="navbarNav">
-        <a href="dashboard.html" class="navbar-link auth-user">Дашборд</a>
-        <a href="about.html" class="navbar-link">О нас</a>
-        <a href="support.html" class="navbar-link">Поддержка</a>
+        <a href="dashboard.html" class="navbar-link auth-user"><span data-i18n="nav.dashboard">Дашборд</span></a>
+        <a href="about.html" class="navbar-link"><span data-i18n="nav.about">О нас</span></a>
+        <a href="support.html" class="navbar-link"><span data-i18n="nav.support">Поддержка</span></a>
       </div>
 
       <div class="navbar-actions">
-        <a href="login.html" class="btn btn-outline auth-guest" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Войти</a>
-        <a href="chat.html" class="btn btn-primary auth-user" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Новый чат</a>
-        <!-- Пользовательское меню -->
+        <a href="login.html" class="btn btn-outline auth-guest"><span data-i18n="nav.login">Войти</span></a>
+        <a href="chat.html" class="btn btn-primary auth-user"><span data-i18n="nav.newChat">Новый чат</span></a>
         <div class="user-menu auth-user">
-          <button class="user-menu-btn" id="userMenuBtn">
+          <button class="user-menu-btn" id="userMenuBtn" type="button">
             <div class="user-avatar user-identity-pending">…</div>
           </button>
           <div class="user-dropdown" id="userDropdown">
@@ -63,21 +59,25 @@
               <div class="dropdown-email user-identity-pending">…</div>
             </div>
             <a href="dashboard.html" class="dropdown-item">
-              <span class="dropdown-icon">📊</span> Панель управления
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.panel">Панель управления</span>
             </a>
             <a href="history.html" class="dropdown-item">
-              <span class="dropdown-icon">🕒</span> История чатов
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.history">История чатов</span>
             </a>
             <a href="profile.html" class="dropdown-item">
-              <span class="dropdown-icon">⚙️</span> Настройки
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.settings">Настройки</span>
             </a>
             <div class="dropdown-divider"></div>
             <a href="index.html" class="dropdown-item text-danger logout-btn">
-              <span class="dropdown-icon">🚪</span> Выйти
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.logout">Выйти</span>
             </a>
           </div>
         </div>
-        <button class="burger-btn" id="burgerBtn" aria-label="Меню">
+        <button class="burger-btn" id="burgerBtn" type="button" data-i18n-aria-label="nav.menu" aria-label="Меню">
           <div class="burger-icon">
             <span></span>
             <span></span>
@@ -88,135 +88,190 @@
     </div>
   </nav>
 
-  <!-- Мобильное меню -->
   <div class="mobile-menu" id="mobileMenu">
-    <a href="dashboard.html" class="navbar-link auth-user">Дашборд</a>
-    <a href="about.html" class="navbar-link">О нас</a>
-    <a href="support.html" class="navbar-link">Поддержка</a>
-    <a href="login.html" class="btn btn-primary">Войти</a>
+    <a href="dashboard.html" class="navbar-link auth-user"><span data-i18n="nav.dashboard">Дашборд</span></a>
+    <a href="about.html" class="navbar-link"><span data-i18n="nav.about">О нас</span></a>
+    <a href="support.html" class="navbar-link"><span data-i18n="nav.support">Поддержка</span></a>
+    <a href="login.html" class="btn btn-primary auth-guest"><span data-i18n="nav.login">Войти</span></a>
   </div>
 
-  <!-- Hero секция -->
   <section class="hero" id="hero">
-    <div class="hero-content">
-      <div class="hero-badge">
-        <span class="hero-badge-dot"></span>
-        AI-навигатор
-      </div>
-      <h1>Разберитесь в законах Казахстана за минуту</h1>
-      <p>Задайте вопрос — получите пошаговую инструкцию со ссылками на законы, простым и понятным языком</p>
+    <div class="container hero-shell">
+      <div class="hero-main">
+        <div class="eyebrow"><span data-i18n="landing.badge">Юридический помощник по праву Казахстана</span></div>
+        <h1 data-i18n="landing.title">Понятные ответы по законам Казахстана для повседневных ситуаций</h1>
+        <p data-i18n="landing.subtitle">ZanGID помогает быстрее разобраться в правовом вопросе: показывает краткий вывод, последовательность действий, нужные документы и полезные источники.</p>
 
-      <form class="hero-search" id="heroSearch">
-        <div class="hero-search-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
+        <form class="hero-search" id="heroSearch">
+          <div class="hero-search-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <input type="text" id="heroSearchInput" data-i18n-placeholder="landing.searchPlaceholder" placeholder="Например: как открыть ИП в Казахстане?">
+          <button type="submit" class="btn btn-primary"><span data-i18n="landing.searchButton">Найти ответ</span></button>
+        </form>
+
+        <div class="hero-notes">
+          <div class="hero-note-card">
+            <h3 data-i18n="landing.trust1Title">Пошаговые ответы</h3>
+            <p data-i18n="landing.trust1Text">Коротко объясняем суть вопроса и показываем понятный порядок действий.</p>
+          </div>
+          <div class="hero-note-card">
+            <h3 data-i18n="landing.trust2Title">Документы и нормы</h3>
+            <p data-i18n="landing.trust2Text">Собираем в одном ответе документы, ссылки на нормы и важные замечания.</p>
+          </div>
+          <div class="hero-note-card">
+            <h3 data-i18n="landing.trust3Title">Русский и казахский</h3>
+            <p data-i18n="landing.trust3Text">Сервис доступен на русском и казахском языках.</p>
+          </div>
         </div>
-        <input type="text" placeholder="Как открыть ИП в Казахстане?" id="heroSearchInput">
-        <button type="submit" class="btn btn-primary">Найти ответ</button>
-      </form>
+      </div>
+
+      <aside class="hero-preview card">
+        <div class="hero-preview-label" data-i18n="landing.previewLabel">Пример ответа</div>
+        <div class="hero-preview-block">
+          <div class="hero-preview-title" data-i18n="landing.previewSummaryTitle">Краткий ответ</div>
+          <p data-i18n="landing.previewSummaryText">Для регистрации ТОО нужно подготовить учредительные данные, выбрать режим налогообложения и подать заявление через eGov.</p>
+        </div>
+        <div class="hero-preview-block">
+          <div class="hero-preview-title" data-i18n="landing.previewStepsTitle">Что делать</div>
+          <div class="hero-preview-steps">
+            <div class="hero-preview-step"><span>1</span><p data-i18n="landing.previewStep1">Подготовьте сведения об учредителях и юридическом адресе.</p></div>
+            <div class="hero-preview-step"><span>2</span><p data-i18n="landing.previewStep2">Выберите ОКЭД и налоговый режим.</p></div>
+            <div class="hero-preview-step"><span>3</span><p data-i18n="landing.previewStep3">Подайте заявление и проверьте статус регистрации.</p></div>
+          </div>
+        </div>
+        <div class="hero-preview-grid">
+          <div class="hero-preview-mini">
+            <div class="hero-preview-title" data-i18n="landing.previewDocsTitle">Документы</div>
+            <ul>
+              <li data-i18n="landing.previewDoc1">Удостоверение личности</li>
+              <li data-i18n="landing.previewDoc2">Данные о компании</li>
+            </ul>
+          </div>
+          <div class="hero-preview-mini">
+            <div class="hero-preview-title" data-i18n="landing.previewSourcesTitle">Правовая база</div>
+            <ul>
+              <li>eGov</li>
+              <li>Adilet</li>
+            </ul>
+          </div>
+        </div>
+      </aside>
     </div>
   </section>
 
-  <!-- Популярные запросы -->
   <section class="section popular">
     <div class="container">
-      <div class="popular-label">Популярные запросы</div>
-      <div class="popular-chips" id="popularChips">
-        <span class="chip" data-query="Как открыть ИП?">🏢 Как открыть ИП?</span>
-        <span class="chip" data-query="Права арендатора">🏠 Права арендатора</span>
-        <span class="chip" data-query="Увольнение по собственному">💼 Увольнение по собственному</span>
-        <span class="chip" data-query="Алименты на ребёнка">👨‍👩‍👧 Алименты на ребёнка</span>
-        <span class="chip" data-query="Возврат товара">🛒 Возврат товара</span>
-        <span class="chip" data-query="Регистрация ТОО">📋 Регистрация ТОО</span>
-      </div>
+      <div class="popular-label" data-i18n="landing.popularLabel">Популярные запросы</div>
+      <div class="popular-chips" id="popularChips"></div>
     </div>
   </section>
 
-  <!-- Категории -->
   <section class="section categories">
     <div class="container">
-      <h2 class="section-title">Категории</h2>
-      <p class="section-subtitle">Выберите тему, чтобы найти пошаговые инструкции</p>
+      <h2 class="section-title" data-i18n="landing.categoriesTitle">Категории запросов</h2>
+      <p class="section-subtitle" data-i18n="landing.categoriesSubtitle">Быстрый вход в самые востребованные правовые сценарии.</p>
 
       <div class="categories-grid">
         <a href="chat.html" class="category-card" id="categoryProperty">
-          <div class="category-icon green">🏠</div>
-          <h3>Недвижимость</h3>
-          <span class="category-count">24 инструкции</span>
+          <div class="category-card-badge">01</div>
+          <h3 data-i18n="landing.categories.property.title">Недвижимость</h3>
+          <span class="category-count" data-i18n="landing.categories.property.count">24 сценария</span>
         </a>
-
         <a href="chat.html" class="category-card" id="categoryBusiness">
-          <div class="category-icon blue">💼</div>
-          <h3>Бизнес</h3>
-          <span class="category-count">31 инструкция</span>
+          <div class="category-card-badge">02</div>
+          <h3 data-i18n="landing.categories.business.title">Бизнес</h3>
+          <span class="category-count" data-i18n="landing.categories.business.count">31 сценарий</span>
         </a>
-
         <a href="chat.html" class="category-card" id="categoryLabor">
-          <div class="category-icon orange">⚖️</div>
-          <h3>Трудовые споры</h3>
-          <span class="category-count">18 инструкций</span>
+          <div class="category-card-badge">03</div>
+          <h3 data-i18n="landing.categories.labor.title">Трудовые споры</h3>
+          <span class="category-count" data-i18n="landing.categories.labor.count">18 сценариев</span>
         </a>
-
         <a href="chat.html" class="category-card" id="categoryUtilities">
-          <div class="category-icon purple">🏢</div>
-          <h3>ЖКХ</h3>
-          <span class="category-count">15 инструкций</span>
+          <div class="category-card-badge">04</div>
+          <h3 data-i18n="landing.categories.utilities.title">ЖКХ</h3>
+          <span class="category-count" data-i18n="landing.categories.utilities.count">15 сценариев</span>
         </a>
       </div>
     </div>
   </section>
 
-  <!-- Как это работает -->
-  <section class="how-it-works">
+  <section class="section features-section">
     <div class="container">
-      <h2 class="section-title" style="text-align: center;">Как это работает</h2>
-      <p class="section-subtitle" style="text-align: center;">Три простых шага к ответу</p>
+      <h2 class="section-title" data-i18n="landing.featuresTitle">Почему ZanGID удобно использовать каждый день</h2>
+      <p class="section-subtitle" data-i18n="landing.featuresSubtitle">Сервис помогает быстрее сориентироваться в вопросе и перейти к следующему шагу без лишней путаницы.</p>
+
+      <div class="features-grid">
+        <article class="feature-card">
+          <h3 data-i18n="landing.features.oneTitle">Структурированный ответ</h3>
+          <p data-i18n="landing.features.oneText">В одном ответе собраны краткий вывод, шаги, документы и правовые ориентиры.</p>
+        </article>
+        <article class="feature-card">
+          <h3 data-i18n="landing.features.twoTitle">История обращений</h3>
+          <p data-i18n="landing.features.twoText">История диалогов сохраняется и помогает быстро вернуться к нужной теме.</p>
+        </article>
+        <article class="feature-card">
+          <h3 data-i18n="landing.features.threeTitle">Продолжение без путаницы</h3>
+          <p data-i18n="landing.features.threeText">Легко вернуться к начатому разговору, чтобы не искать тему заново и не терять контекст.</p>
+        </article>
+        <article class="feature-card">
+          <h3 data-i18n="landing.features.fourTitle">Спокойный интерфейс</h3>
+          <p data-i18n="landing.features.fourText">Ничего лишнего: сдержанная подача и аккуратная структура помогают сосредоточиться на сути.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section how-it-works">
+    <div class="container">
+      <h2 class="section-title" data-i18n="landing.processTitle">Как это работает</h2>
+      <p class="section-subtitle" data-i18n="landing.processSubtitle">От вопроса к понятному плану действий.</p>
 
       <div class="steps-grid">
-        <div class="step-card">
+        <article class="step-card">
           <div class="step-number">1</div>
-          <h3>Задайте вопрос</h3>
-          <p>Опишите ситуацию своими словами — как будто спрашиваете у друга-юриста</p>
-        </div>
-        <div class="step-card">
+          <h3 data-i18n="landing.processStep1Title">Опишите ситуацию</h3>
+          <p data-i18n="landing.processStep1Text">Сформулируйте вопрос так, как вы бы задали его юристу или специалисту.</p>
+        </article>
+        <article class="step-card">
           <div class="step-number">2</div>
-          <h3>ИИ анализирует</h3>
-          <p>Система находит релевантные статьи законов и формирует пошаговый ответ</p>
-        </div>
-        <div class="step-card">
+          <h3 data-i18n="landing.processStep2Title">Получите структуру ответа</h3>
+          <p data-i18n="landing.processStep2Text">Вы получите краткий вывод, пошаговый план, список документов и полезные ссылки.</p>
+        </article>
+        <article class="step-card">
           <div class="step-number">3</div>
-          <h3>Получите инструкцию</h3>
-          <p>Чёткий план действий со ссылками на законы и необходимые документы</p>
-        </div>
+          <h3 data-i18n="landing.processStep3Title">Проверьте и действуйте</h3>
+          <p data-i18n="landing.processStep3Text">Проверьте важные детали по официальным источникам и переходите к следующему действию.</p>
+        </article>
       </div>
     </div>
   </section>
 
-  <!-- CTA -->
   <section class="section cta-section">
     <div class="container">
-      <h2>Готовы разобраться в законах?</h2>
-      <p>Начните прямо сейчас — это бесплатно</p>
-      <a href="chat.html" class="btn btn-primary">Задать вопрос</a>
+      <div class="cta-card">
+        <h2 data-i18n="landing.ctaTitle">Разобраться в вопросе можно за пару минут</h2>
+        <p data-i18n="landing.ctaText">Откройте чат, опишите ситуацию и получите понятный ориентир по следующему шагу.</p>
+        <a href="chat.html" class="btn btn-primary"><span data-i18n="landing.ctaButton">Задать вопрос</span></a>
+      </div>
     </div>
   </section>
 
-  <!-- Футер -->
   <footer class="footer">
     <div class="footer-inner">
-      <span class="footer-copy">© 2026 ZanGID. Все права защищены.</span>
+      <span class="footer-copy" data-i18n="footer.copyright">© 2026 ZanGID. Все права защищены.</span>
       <div class="footer-links">
-        <a href="about.html">О нас</a>
-        <a href="support.html">Поддержка</a>
+        <a href="about.html" data-i18n="footer.about">О нас</a>
+        <a href="support.html" data-i18n="footer.support">Поддержка</a>
       </div>
     </div>
   </footer>
 
-  <script src="js/app.js"></script>
+  <script src="js/runtime.js"></script>
   <script src="js/index.js"></script>
 </body>
-
 </html>

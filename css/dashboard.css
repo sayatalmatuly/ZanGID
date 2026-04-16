@@ -1,105 +1,98 @@
-/* ===========================
-   ZanGID — Стили дашборда
-   =========================== */
-
-.dashboard-header {
-  background: var(--gradient-primary);
-  padding: 48px 20px 60px;
-  color: #FFFFFF;
+﻿.dashboard-header {
+  padding: 34px 20px 56px;
 }
 
 .dashboard-header-inner {
-  max-width: 1140px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 .dashboard-header h1 {
-  font-size: 2rem;
-  margin-bottom: 8px;
-  color: #FFFFFF;
-}
-
-.dashboard-header h1.user-identity-pending {
-  color: rgba(255, 255, 255, 0.55);
-  font-weight: 500;
+  margin-top: 16px;
+  margin-bottom: 12px;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
 }
 
 .dashboard-header p {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 1.0625rem;
+  max-width: 720px;
+  font-size: 1rem;
+  line-height: 1.75;
 }
 
 .dashboard-content {
-  max-width: 1140px;
-  margin: -40px auto 60px;
-  padding: 0 20px;
+  max-width: 1200px;
+  margin: -18px auto 0;
+  padding: 0 20px 20px;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(29, 143, 106, 0.12);
+  color: var(--accent-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.stat-label {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
 }
 
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 3fr 1fr;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1.5fr) 320px;
+  gap: 18px;
 }
 
-/* Статистика */
-.stats-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
+.dashboard-main-panel,
+.dashboard-sidebar {
+  min-width: 0;
 }
 
-.stat-card {
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  background-color: var(--accent-light);
-  color: var(--accent-text);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-}
-
-.stat-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.2;
-}
-
-.stat-label {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-/* Недавние активности */
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 .section-header h2 {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
 }
 
 .recent-list {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 12px;
 }
 
@@ -107,68 +100,62 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-radius: var(--radius-md);
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 20px;
   border: 1px solid var(--border-color);
-  background-color: var(--card-bg);
-  transition: all 0.2s;
-  text-decoration: none;
+  background: var(--bg-elevated);
   box-shadow: var(--shadow-sm);
+  text-decoration: none;
 }
 
 .recent-item:hover {
-  border-color: var(--accent);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  border-color: rgba(29, 143, 106, 0.26);
 }
 
 .recent-item-main {
   display: flex;
-  align-items: center;
-  gap: 16px;
+  gap: 14px;
+  min-width: 0;
 }
 
 .recent-icon {
-  font-size: 1.25rem;
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  background: rgba(29, 143, 106, 0.12);
+  color: var(--accent-strong);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 800;
+  flex: 0 0 38px;
 }
 
 .recent-title {
   color: var(--text-primary);
-  font-weight: 600;
-  font-size: 0.9375rem;
-  margin-bottom: 4px;
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 .recent-meta {
+  margin-top: 4px;
   color: var(--text-muted);
-  font-size: 0.8125rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-size: 0.84rem;
 }
 
 .recent-action {
   color: var(--accent);
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.recent-item:hover .recent-action {
-  opacity: 1;
-}
-
-/* Боковая колонка */
-.quick-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
+  flex: 0 0 auto;
 }
 
 .quick-action-btn {
   width: 100%;
-  justify-content: flex-start;
-  padding: 14px 20px;
+  justify-content: center;
+  margin-bottom: 16px;
 }
 
 .suggestions-card {
@@ -176,93 +163,141 @@
 }
 
 .suggestions-card h3 {
-  font-size: 1.0625rem;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
+  font-size: 1.05rem;
+}
+
+.suggestions-card p {
+  margin-bottom: 14px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.suggestions-list {
+  display: grid;
+  gap: 10px;
 }
 
 .suggestion-chip {
   display: block;
-  padding: 10px 14px;
-  background-color: var(--bg-tertiary);
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
   color: var(--text-secondary);
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
   text-decoration: none;
-  margin-bottom: 8px;
-  transition: all 0.2s;
+  font-size: 0.9rem;
 }
 
 .suggestion-chip:hover {
-  background-color: var(--accent-light);
-  color: var(--accent-text);
-  transform: translateX(4px);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border-color: rgba(29, 143, 106, 0.26);
 }
 
-@media (max-width: 992px) {
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 20px;
+}
+
+.onboarding-overlay.show {
+  display: flex;
+}
+
+.onboarding-card {
+  width: min(100%, 460px);
+  padding: 26px;
+  border-radius: 24px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-lg);
+}
+
+.onboarding-card h2 {
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+.onboarding-subtitle {
+  margin-bottom: 20px;
+  color: var(--text-muted);
+}
+
+.onboarding-form {
+  display: grid;
+  gap: 16px;
+}
+
+.form-group {
+  display: grid;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.form-hint {
+  margin-top: -2px;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.city-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.city-chip {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.city-chip.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+#onboardingOtherCity {
+  display: none;
+}
+
+.onboarding-submit {
+  width: 100%;
+}
+
+@media (max-width: 980px) {
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 760px) {
   .stats-cards {
     grid-template-columns: 1fr;
   }
+
   .recent-item {
-    flex-direction: column;
     align-items: flex-start;
-    gap: 12px;
+    flex-direction: column;
   }
-  .recent-action {
-    opacity: 1;
-    align-self: flex-end;
+
+  .section-header {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
-
-/* Onboarding Popup Styles */
-  .onboarding-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.6);
-    z-index: 9999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-  .onboarding-overlay.show {
-    display: flex;
-    opacity: 1;
-  }
-  .onboarding-card {
-    background: var(--bg-card, #fff);
-    border-radius: var(--radius-lg, 12px);
-    width: 90%;
-    max-width: 400px;
-    padding: 32px;
-    box-shadow: var(--shadow-xl);
-    transform: translateY(20px);
-    transition: transform 0.3s ease;
-  }
-  .onboarding-overlay.show .onboarding-card {
-    transform: translateY(0);
-  }
-  .city-chip {
-    padding: 8px 12px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-pill);
-    background: var(--bg-component);
-    color: var(--text-primary);
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-  }
-  .city-chip:hover {
-    background: var(--bg-hover);
-  }
-  .city-chip.active {
-    background: #10b981;
-    color: #fff;
-    border-color: #10b981;
-  }

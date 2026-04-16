@@ -1,19 +1,19 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ZanGID — чат с AI-помощником по законодательству Казахстана.">
+  <meta name="description" content="Чат ZanGID — юридический AI-ассистент по праву Казахстана.">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 64 78' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='32' cy='46' r='28' stroke='%231D9E75' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='46' r='2.5' fill='%231D9E75'/%3E%3C/svg%3E">
   <title>Чат — ZanGID</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/ui.css">
   <link rel="stylesheet" href="css/chat.css">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
+  <script src="js/i18n.js"></script>
 </head>
-<body>
-
-  <!-- Навбар чата -->
+<body class="chat-page">
   <nav class="navbar" id="navbar">
     <div class="navbar-inner">
       <a href="index.html" class="navbar-logo">
@@ -37,19 +37,19 @@
             </g>
           </svg>
         </div>
-        ZanGID
+        <span>ZanGID</span>
       </a>
+
       <div class="navbar-nav" id="navbarNav">
-        <a href="dashboard.html" class="navbar-link auth-user">Дашборд</a>
-        <a href="about.html" class="navbar-link">О нас</a>
-        <a href="support.html" class="navbar-link">Поддержка</a>
+        <a href="dashboard.html" class="navbar-link auth-user"><span data-i18n="nav.dashboard">Дашборд</span></a>
+        <a href="about.html" class="navbar-link"><span data-i18n="nav.about">О нас</span></a>
+        <a href="support.html" class="navbar-link"><span data-i18n="nav.support">Поддержка</span></a>
       </div>
 
       <div class="navbar-actions">
-        <a href="login.html" class="btn btn-outline auth-guest" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Войти</a>
-        <!-- Пользовательское меню -->
+        <a href="login.html" class="btn btn-outline auth-guest"><span data-i18n="nav.login">Войти</span></a>
         <div class="user-menu auth-user">
-          <button class="user-menu-btn" id="userMenuBtn">
+          <button class="user-menu-btn" id="userMenuBtn" type="button">
             <div class="user-avatar user-identity-pending">…</div>
           </button>
           <div class="user-dropdown" id="userDropdown">
@@ -58,80 +58,99 @@
               <div class="dropdown-email user-identity-pending">…</div>
             </div>
             <a href="dashboard.html" class="dropdown-item">
-              <span class="dropdown-icon">📊</span> Панель управления
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.panel">Панель управления</span>
             </a>
             <a href="history.html" class="dropdown-item">
-              <span class="dropdown-icon">🕒</span> История чатов
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.history">История чатов</span>
             </a>
             <a href="profile.html" class="dropdown-item">
-              <span class="dropdown-icon">⚙️</span> Настройки
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.settings">Настройки</span>
             </a>
             <div class="dropdown-divider"></div>
             <a href="index.html" class="dropdown-item text-danger logout-btn">
-              <span class="dropdown-icon">🚪</span> Выйти
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.logout">Выйти</span>
             </a>
           </div>
         </div>
+        <button class="burger-btn" id="burgerBtn" type="button" data-i18n-aria-label="nav.menu" aria-label="Меню">
+          <div class="burger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </button>
       </div>
     </div>
   </nav>
 
-  <!-- Layout чата -->
-  <div class="chat-layout">
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="dashboard.html" class="navbar-link auth-user"><span data-i18n="nav.dashboard">Дашборд</span></a>
+    <a href="about.html" class="navbar-link"><span data-i18n="nav.about">О нас</span></a>
+    <a href="support.html" class="navbar-link"><span data-i18n="nav.support">Поддержка</span></a>
+    <a href="login.html" class="btn btn-primary auth-guest"><span data-i18n="nav.login">Войти</span></a>
+  </div>
 
-    <!-- Сайдбар -->
+  <div class="chat-layout">
     <aside class="chat-sidebar" id="chatSidebar">
       <div class="sidebar-header">
-        <button class="btn btn-primary" id="newChatBtn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
+        <button class="btn btn-primary" id="newChatBtn" type="button">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-          Новый чат
+          <span data-i18n="chat.newChat">Новый чат</span>
         </button>
       </div>
 
       <div class="sidebar-list" id="sidebarList">
-        <div class="sidebar-label">История запросов</div>
+        <div class="sidebar-label" data-i18n="chat.sidebarLabel">История запросов</div>
       </div>
     </aside>
 
-    <!-- Основная область чата -->
     <main class="chat-main">
-      <!-- Заголовок чата -->
-      <div class="chat-header">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <button class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Открыть сайдбар">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <line x1="3" y1="12" x2="21" y2="12"/>
-              <line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
-          </button>
-          <h2 class="chat-header-title" id="chatTitle">Новый чат</h2>
+      <header class="chat-header">
+        <div class="chat-header-main">
+          <div class="chat-header-row">
+            <button class="sidebar-toggle-btn" id="sidebarToggle" type="button" data-i18n-aria-label="nav.openSidebar" aria-label="Открыть список чатов">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+            <div class="eyebrow"><span data-i18n="chat.headerEyebrow">Юридический AI-ассистент</span></div>
+          </div>
+          <div class="chat-title-block">
+            <h1 class="chat-header-title" id="chatTitle" data-i18n="common.untitledChat">Новый чат</h1>
+            <p class="chat-header-hint" data-i18n="chat.headerHint">Краткий ответ, шаги, документы и правовые основания в одном окне.</p>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <!-- Сообщения -->
-      <div class="chat-messages" id="chatMessages"></div>
+      <section class="chat-messages" id="chatMessages"></section>
 
-      <!-- Поле ввода -->
       <div class="chat-input-area">
-        <div class="chat-input-wrapper">
-          <input type="text" placeholder="Задайте вопрос о законах..." id="chatInput">
-          <button class="chat-send-btn" id="chatSendBtn" aria-label="Отправить">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-          </button>
+        <div class="chat-input-panel">
+          <div class="chat-input-wrapper">
+            <textarea id="chatInput" rows="1" data-i18n-placeholder="chat.inputPlaceholder" placeholder="Опишите юридический вопрос или ситуацию..."></textarea>
+            <button class="chat-send-btn" id="chatSendBtn" type="button" data-i18n-aria-label="chat.send" aria-label="Отправить">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 2L11 13"></path>
+                <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+              </svg>
+            </button>
+          </div>
+          <p class="chat-disclaimer" data-i18n="chat.disclaimer">ИИ может допускать ошибки. Важную информацию рекомендуем перепроверять по официальным источникам.</p>
         </div>
       </div>
     </main>
-
   </div>
 
-  <script src="js/app.js"></script>
+  <script src="js/runtime.js"></script>
   <script src="js/chat.js"></script>
 </body>
 </html>

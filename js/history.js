@@ -1,239 +1,226 @@
-/**
- * ZanGID — История чатов: загрузка из Supabase
- */
-
-(function () {
+﻿(function () {
   'use strict';
 
-  function mondayStart(d) {
-    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    var day = x.getDay();
+  function mondayStart(date) {
+    var copy = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    var day = copy.getDay();
     var diff = day === 0 ? -6 : 1 - day;
-    x.setDate(x.getDate() + diff);
-    return x;
+    copy.setDate(copy.getDate() + diff);
+    return copy;
   }
 
-  function monthStart(d) {
-    return new Date(d.getFullYear(), d.getMonth(), 1);
-  }
-
-  function formatChatDate(iso) {
-    var d = new Date(iso);
-    var now = new Date();
-    function dayStart(x) {
-      return new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
-    }
-    var ds = dayStart(d);
-    var ns = dayStart(now);
-    var diffDays = Math.round((ns - ds) / 86400000);
-    if (diffDays === 0) {
-      return (
-        'Сегодня, ' +
-        d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
-      );
-    }
-    if (diffDays === 1) return 'Вчера';
-    return d.toLocaleDateString('ru-RU', {
-      day: 'numeric',
-      month: 'short',
-      year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-    });
-  }
-
-  function truncate(text, max) {
-    if (!text) return '';
-    var s = String(text).trim();
-    if (s.length <= max) return s;
-    return s.slice(0, max - 1) + '…';
-  }
-
-  function escapeHtml(s) {
-    if (s == null) return '';
-    var div = document.createElement('div');
-    div.textContent = s;
-    return div.innerHTML;
-  }
-
-  function buildArrowSvg() {
-    return (
-      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-      '<path d="M5 12h14M12 5l7 7-7 7"/></svg>'
-    );
+  function monthStart(date) {
+    return new Date(date.getFullYear(), date.getMonth(), 1);
   }
 
   function groupKeyForChat(createdAt, now) {
-    var c = new Date(createdAt);
-    var m0 = mondayStart(now);
-    if (c >= m0) return 'week';
-    var m1 = monthStart(now);
-    if (c >= m1) return 'month';
+    var created = new Date(createdAt);
+    if (created >= mondayStart(now)) return 'week';
+    if (created >= monthStart(now)) return 'month';
     return 'older';
+  }
+
+  function escapeHtml(value) {
+    var div = document.createElement('div');
+    div.textContent = value == null ? '' : String(value);
+    return div.innerHTML;
   }
 
   document.addEventListener('DOMContentLoaded', async function () {
     if (!window.supabaseClient) return;
 
     var timeline = document.getElementById('historyTimeline');
-    var loadingEl = document.getElementById('historyLoading');
-    if (!timeline) return;
-
-    var searchInput = document.querySelector('.history-search input');
+    var searchInput = document.getElementById('historySearchInput');
+    var filters = document.getElementById('historyFilters');
     var renderedItems = [];
+    var chatsCache = [];
 
-    var { data: sessionData } = await window.supabaseClient.auth.getSession();
-    var session = sessionData && sessionData.session;
-    if (!session) return;
+    function t(key) {
+      return window.ZanGid.t(key);
+    }
 
-    var user = session.user;
+    function getData(key) {
+      return window.ZanGidI18n.get(key, window.ZanGid.getLanguage());
+    }
 
-    try {
-      var { data: chats, error: chatsErr } = await window.supabaseClient
-        .from('chats')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (chatsErr) throw chatsErr;
-
-      if (loadingEl) {
-        loadingEl.remove();
-        loadingEl = null;
-      }
-
-      if (!chats || chats.length === 0) {
-        timeline.innerHTML =
-          '<div class="empty-state">' +
-          '<div class="empty-state-icon">🔍</div>' +
-          '<h4 class="empty-state-title">История пуста</h4>' +
-          '<p class="empty-state-text">Вы ещё не задавали вопросов</p>' +
-          '<button class="btn btn-primary empty-state-btn" type="button" onclick="window.location.href=\'chat.html\'">Задать первый вопрос</button>' +
-          '</div>';
-        return;
-      }
-
-      var ids = chats.map(function (c) {
-        return c.id;
+    function renderFilters() {
+      filters.innerHTML = '';
+      (getData('history.filters') || []).forEach(function (label, index) {
+        var chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'chip' + (index === 0 ? ' active' : '');
+        chip.textContent = label;
+        filters.appendChild(chip);
       });
+    }
 
-      var firstByChat = {};
-      if (ids.length > 0) {
-        var { data: userMsgs, error: msgErr } = await window.supabaseClient
-          .from('messages')
-          .select('chat_id, content, created_at')
-          .eq('role', 'user')
-          .in('chat_id', ids)
-          .order('created_at', { ascending: true });
+    function formatChatDate(iso) {
+      var date = new Date(iso);
+      var now = new Date();
+      var dayStart = function (value) {
+        return new Date(value.getFullYear(), value.getMonth(), value.getDate()).getTime();
+      };
+      var diffDays = Math.round((dayStart(now) - dayStart(date)) / 86400000);
+      if (diffDays === 0) {
+        return t('common.today') + ', ' + window.ZanGid.formatDate(date, { hour: '2-digit', minute: '2-digit' });
+      }
+      if (diffDays === 1) {
+        return t('common.yesterday');
+      }
+      return window.ZanGid.formatDate(date, {
+        day: 'numeric',
+        month: 'short',
+        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+      });
+    }
 
-        if (msgErr) throw msgErr;
+    function truncate(text, maxLength) {
+      if (!text) return '';
+      var normalized = String(text).trim();
+      if (normalized.length <= maxLength) return normalized;
+      return normalized.slice(0, maxLength - 1) + '…';
+    }
 
-        (userMsgs || []).forEach(function (m) {
-          if (firstByChat[m.chat_id] == null) {
-            firstByChat[m.chat_id] = m;
-          }
+    function renderTimeline() {
+      if (!chatsCache.length) {
+        timeline.innerHTML = window.ZanGid.createStateMarkup({
+          type: 'empty',
+          title: t('history.emptyTitle'),
+          text: t('history.emptyText'),
+          actionHref: 'chat.html',
+          actionLabel: t('history.firstQuestion')
         });
+        return;
       }
 
       var now = new Date();
       var buckets = { week: [], month: [], older: [] };
-      chats.forEach(function (chat) {
-        var k = groupKeyForChat(chat.created_at, now);
-        buckets[k].push(chat);
+      chatsCache.forEach(function (chat) {
+        buckets[groupKeyForChat(chat.created_at, now)].push(chat);
       });
 
       var labels = {
-        week: 'На этой неделе',
-        month: 'В этом месяце',
-        older: 'Ранее'
+        week: t('history.groupWeek'),
+        month: t('history.groupMonth'),
+        older: t('history.groupOlder')
       };
 
       timeline.innerHTML = '';
       renderedItems = [];
 
       ['week', 'month', 'older'].forEach(function (key) {
-        var list = buckets[key];
-        if (!list.length) return;
+        if (!buckets[key].length) return;
 
         var group = document.createElement('div');
         group.className = 'timeline-group';
-        group.dataset.historyGroup = key;
 
         var title = document.createElement('div');
         title.className = 'timeline-group-title';
         title.textContent = labels[key];
         group.appendChild(title);
 
-        var itemsWrap = document.createElement('div');
-        itemsWrap.className = 'timeline-items';
+        var items = document.createElement('div');
+        items.className = 'timeline-items';
 
-        list.forEach(function (chat) {
-          var first = firstByChat[chat.id];
-          var preview = first && first.content ? first.content : '';
-          var titleText = chat.title || 'Новый чат';
-          var href = 'chat.html?id=' + encodeURIComponent(chat.id);
-
-          var a = document.createElement('a');
-          a.href = href;
-          a.className = 'timeline-item';
-          a.dataset.search =
-            (titleText + ' ' + preview).toLowerCase();
-
-          a.innerHTML =
+        buckets[key].forEach(function (chat) {
+          var item = document.createElement('a');
+          item.className = 'timeline-item';
+          item.href = 'chat.html?id=' + encodeURIComponent(chat.id);
+          item.dataset.search = ((chat.title || '') + ' ' + (chat.preview || '')).toLowerCase();
+          item.innerHTML =
             '<div class="timeline-info">' +
-            '<h3>' +
-            escapeHtml(titleText) +
-            '</h3>' +
-            '<div class="timeline-meta">' +
-            '<span class="timeline-meta-item">💬 ' +
-            escapeHtml(truncate(preview, 140) || '—') +
-            '</span>' +
-            '<span class="timeline-meta-item">🕒 ' +
-            escapeHtml(formatChatDate(chat.created_at)) +
-            '</span>' +
+              '<h3>' + escapeHtml(chat.title || t('common.untitledChat')) + '</h3>' +
+              '<div class="timeline-meta">' +
+                '<span class="timeline-meta-item">' + escapeHtml(truncate(chat.preview || t('history.previewPlaceholder'), 120)) + '</span>' +
+                '<span class="timeline-meta-item">' + escapeHtml(formatChatDate(chat.created_at)) + '</span>' +
+              '</div>' +
             '</div>' +
-            '</div>' +
-            '<div class="timeline-action">' +
-            buildArrowSvg() +
-            '</div>';
-
-          itemsWrap.appendChild(a);
-          renderedItems.push(a);
+            '<div class="timeline-action">→</div>';
+          items.appendChild(item);
+          renderedItems.push(item);
         });
 
-        group.appendChild(itemsWrap);
+        group.appendChild(items);
         timeline.appendChild(group);
       });
-
-      function applySearchFilter() {
-        var q = (searchInput && searchInput.value.trim().toLowerCase()) || '';
-        renderedItems.forEach(function (el) {
-          if (!q) {
-            el.style.display = '';
-            return;
-          }
-          var hay = el.dataset.search || '';
-          el.style.display = hay.indexOf(q) !== -1 ? '' : 'none';
-        });
-        timeline.querySelectorAll('.timeline-group').forEach(function (g) {
-          var items = g.querySelectorAll('.timeline-item');
-          var any = false;
-          items.forEach(function (it) {
-            if (it.style.display !== 'none') any = true;
-          });
-          g.style.display = any ? '' : 'none';
-        });
-      }
-
-      if (searchInput) {
-        searchInput.addEventListener('input', applySearchFilter);
-      }
-    } catch (err) {
-      console.error('Ошибка загрузки истории:', err);
-      if (loadingEl) {
-        loadingEl.textContent = 'Не удалось загрузить историю. Обновите страницу.';
-      } else {
-        timeline.innerHTML =
-          '<p style="text-align:center;color:var(--text-muted);padding:32px;">Не удалось загрузить историю.</p>';
-      }
     }
+
+    function applySearch() {
+      var query = String(searchInput.value || '').trim().toLowerCase();
+      renderedItems.forEach(function (item) {
+        item.style.display = !query || (item.dataset.search || '').indexOf(query) !== -1 ? '' : 'none';
+      });
+      timeline.querySelectorAll('.timeline-group').forEach(function (group) {
+        var visible = Array.prototype.some.call(group.querySelectorAll('.timeline-item'), function (item) {
+          return item.style.display !== 'none';
+        });
+        group.style.display = visible ? '' : 'none';
+      });
+    }
+
+    document.addEventListener('zangid:languagechange', function () {
+      renderFilters();
+      renderTimeline();
+      applySearch();
+    });
+
+    renderFilters();
+    timeline.innerHTML = window.ZanGid.createSkeletonMarkup(3, 'row');
+
+    try {
+      var sessionData = await window.supabaseClient.auth.getSession();
+      var session = sessionData && sessionData.data ? sessionData.data.session : null;
+      if (!session) return;
+
+      var chatsResponse = await window.supabaseClient
+        .from('chats')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
+      if (chatsResponse.error) throw chatsResponse.error;
+
+      var chats = chatsResponse.data || [];
+      if (!chats.length) {
+        chatsCache = [];
+        renderTimeline();
+        return;
+      }
+
+      var ids = chats.map(function (chat) { return chat.id; });
+      var messagesResponse = await window.supabaseClient
+        .from('messages')
+        .select('chat_id, content, created_at')
+        .eq('role', 'user')
+        .in('chat_id', ids)
+        .order('created_at', { ascending: true });
+      if (messagesResponse.error) throw messagesResponse.error;
+
+      var previews = {};
+      (messagesResponse.data || []).forEach(function (message) {
+        if (previews[message.chat_id]) return;
+        previews[message.chat_id] = message.content;
+      });
+
+      chatsCache = chats.map(function (chat) {
+        return {
+          id: chat.id,
+          title: chat.title,
+          created_at: chat.created_at,
+          preview: previews[chat.id] || ''
+        };
+      });
+      renderTimeline();
+    } catch (error) {
+      console.error('Ошибка загрузки истории:', error);
+      timeline.innerHTML = window.ZanGid.createStateMarkup({
+        type: 'error',
+        title: t('history.errorTitle'),
+        text: t('history.errorText'),
+        actionHref: 'chat.html',
+        actionLabel: t('nav.newChat')
+      });
+    }
+
+    searchInput.addEventListener('input', applySearch);
   });
 })();

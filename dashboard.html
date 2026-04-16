@@ -1,21 +1,19 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="ZanGID — Панель управления">
+  <meta name="description" content="ZanGID — панель управления пользователя.">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 64 78' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='32' cy='46' r='28' stroke='%231D9E75' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='46' r='2.5' fill='%231D9E75'/%3E%3C/svg%3E">
-  <title>ZanGID — Панель управления</title>
+  <title>ZanGID — Дашборд</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/ui.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
+  <script src="js/i18n.js"></script>
 </head>
-
 <body>
-
-  <!-- Навбар -->
   <nav class="navbar" id="navbar">
     <div class="navbar-inner">
       <a href="index.html" class="navbar-logo">
@@ -39,21 +37,20 @@
             </g>
           </svg>
         </div>
-        ZanGID
+        <span>ZanGID</span>
       </a>
 
       <div class="navbar-nav" id="navbarNav">
-        <a href="dashboard.html" class="navbar-link active auth-user">Дашборд</a>
-        <a href="about.html" class="navbar-link">О нас</a>
-        <a href="support.html" class="navbar-link">Поддержка</a>
+        <a href="dashboard.html" class="navbar-link active auth-user"><span data-i18n="nav.dashboard">Дашборд</span></a>
+        <a href="about.html" class="navbar-link"><span data-i18n="nav.about">О нас</span></a>
+        <a href="support.html" class="navbar-link"><span data-i18n="nav.support">Поддержка</span></a>
       </div>
 
       <div class="navbar-actions">
-        <a href="login.html" class="btn btn-outline auth-guest" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Войти</a>
-        <a href="chat.html" class="btn btn-primary auth-user" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Новый чат</a>
-        <!-- Пользовательское меню -->
+        <a href="login.html" class="btn btn-outline auth-guest"><span data-i18n="nav.login">Войти</span></a>
+        <a href="chat.html" class="btn btn-primary auth-user"><span data-i18n="nav.newChat">Новый чат</span></a>
         <div class="user-menu auth-user">
-          <button class="user-menu-btn" id="userMenuBtn">
+          <button class="user-menu-btn" id="userMenuBtn" type="button">
             <div class="user-avatar user-identity-pending">…</div>
           </button>
           <div class="user-dropdown" id="userDropdown">
@@ -62,21 +59,25 @@
               <div class="dropdown-email user-identity-pending">…</div>
             </div>
             <a href="dashboard.html" class="dropdown-item">
-              <span class="dropdown-icon">📊</span> Панель управления
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.panel">Панель управления</span>
             </a>
             <a href="history.html" class="dropdown-item">
-              <span class="dropdown-icon">🕒</span> История чатов
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.history">История чатов</span>
             </a>
             <a href="profile.html" class="dropdown-item">
-              <span class="dropdown-icon">⚙️</span> Настройки
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.settings">Настройки</span>
             </a>
             <div class="dropdown-divider"></div>
             <a href="index.html" class="dropdown-item text-danger logout-btn">
-              <span class="dropdown-icon">🚪</span> Выйти
+              <span class="dropdown-icon">•</span>
+              <span data-i18n="dropdown.logout">Выйти</span>
             </a>
           </div>
         </div>
-        <button class="burger-btn" id="burgerBtn" aria-label="Меню">
+        <button class="burger-btn" id="burgerBtn" type="button" data-i18n-aria-label="nav.menu" aria-label="Меню">
           <div class="burger-icon">
             <span></span>
             <span></span>
@@ -87,134 +88,107 @@
     </div>
   </nav>
 
-  <!-- Мобильное меню -->
   <div class="mobile-menu" id="mobileMenu">
-    <a href="dashboard.html" class="navbar-link active auth-user">Дашборд</a>
-    <a href="about.html" class="navbar-link">О нас</a>
-    <a href="support.html" class="navbar-link">Поддержка</a>
+    <a href="dashboard.html" class="navbar-link active auth-user"><span data-i18n="nav.dashboard">Дашборд</span></a>
+    <a href="about.html" class="navbar-link"><span data-i18n="nav.about">О нас</span></a>
+    <a href="support.html" class="navbar-link"><span data-i18n="nav.support">Поддержка</span></a>
   </div>
 
-  <!-- Шапка дашборда -->
   <section class="dashboard-header">
     <div class="dashboard-header-inner">
+      <div class="eyebrow"><span data-i18n="nav.dashboard">Дашборд</span></div>
       <h1 id="dashboardGreeting" class="user-identity-pending">…</h1>
-      <p>Продолжите разбираться в законах или создайте новый запрос</p>
+      <p data-i18n="dashboard.subtitle">Продолжайте работу с запросами, следите за активностью и быстро возвращайтесь к важным диалогам.</p>
     </div>
   </section>
 
-  <!-- Основной контент -->
   <div class="dashboard-content">
-    
-    <!-- Карточки статистики -->
     <div class="stats-cards">
-      <div class="card stat-card">
-        <div class="stat-icon">💬</div>
+      <article class="card stat-card">
+        <div class="stat-icon">Q</div>
         <div class="stat-info">
           <span class="stat-value" id="statQuestions">0</span>
-          <span class="stat-label">Задано вопросов</span>
+          <span class="stat-label" data-i18n="dashboard.statQuestions">Задано вопросов</span>
         </div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-icon">📑</div>
+      </article>
+      <article class="card stat-card">
+        <div class="stat-icon">C</div>
         <div class="stat-info">
           <span class="stat-value" id="statChats">0</span>
-          <span class="stat-label">Активных чатов</span>
+          <span class="stat-label" data-i18n="dashboard.statChats">Активных чатов</span>
         </div>
-      </div>
-      <div class="card stat-card">
-        <div class="stat-icon">📅</div>
+      </article>
+      <article class="card stat-card">
+        <div class="stat-icon">D</div>
         <div class="stat-info">
           <span class="stat-value" id="statDays">0</span>
-          <span class="stat-label">Дней с нами</span>
+          <span class="stat-label" data-i18n="dashboard.statDays">Дней с нами</span>
         </div>
-      </div>
+      </article>
     </div>
 
     <div class="dashboard-grid">
-      <!-- Левая колонка: Недавняя активность -->
-      <div class="dashboard-main">
+      <section class="dashboard-main-panel">
         <div class="section-header">
-          <h2>Недавние запросы</h2>
-          <a href="history.html" class="btn btn-ghost">Смотреть всё</a>
+          <h2 data-i18n="dashboard.recentTitle">Недавние запросы</h2>
+          <a href="history.html" class="btn btn-ghost"><span data-i18n="dashboard.viewAll">Смотреть всё</span></a>
         </div>
-        
-        <div class="recent-list" id="recentRequestsList">
-          <div style="padding: 24px; text-align: center; color: var(--text-muted);">
-            Загрузка...
-          </div>
-        </div>
-      </div>
+        <div class="recent-list" id="recentRequestsList"></div>
+      </section>
 
-      <!-- Правая колонка: Рекомендации и действия -->
       <aside class="dashboard-sidebar">
-        <div class="quick-actions">
-          <a href="chat.html" class="btn btn-primary quick-action-btn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Новый запрос к ZanGID
-          </a>
-        </div>
+        <a href="chat.html" class="btn btn-primary quick-action-btn"><span data-i18n="dashboard.quickAction">Новый запрос к ZanGID</span></a>
 
         <div class="card suggestions-card">
-          <h3>Рекомендованные темы</h3>
-          <p style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 12px;">Основано на ваших интересах</p>
-          <div class="suggestions-list">
-            <a href="chat.html?q=Открыть ИП" class="suggestion-chip">Открыть ИП</a>
-            <a href="chat.html?q=Трудовые споры" class="suggestion-chip">Трудовые споры</a>
-            <a href="chat.html?q=Оформить наследство" class="suggestion-chip">Оформить наследство</a>
-            <a href="chat.html?q=Договор аренды" class="suggestion-chip">Договор аренды</a>
-            <a href="chat.html?q=Жалоба на КСК" class="suggestion-chip">Жалоба на КСК</a>
-          </div>
+          <h3 data-i18n="dashboard.suggestionsTitle">Рекомендуемые темы</h3>
+          <p data-i18n="dashboard.suggestionsSubtitle">Можно начать с одного из типовых сценариев.</p>
+          <div class="suggestions-list" id="suggestionsList"></div>
         </div>
       </aside>
     </div>
   </div>
 
-  <!-- Футер -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <span class="footer-copy">© 2026 ZanGID. Все права защищены.</span>
-      <div class="footer-links">
-        <a href="about.html">О нас</a>
-        <a href="support.html">Поддержка</a>
-      </div>
-    </div>
-  </footer>
-
-  <!-- Onboarding Popup -->
   <div class="onboarding-overlay" id="onboardingPopup">
     <div class="onboarding-card">
-      <h2 style="margin-bottom: 8px;">Давайте познакомимся! 👋</h2>
-      <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.9rem;">Это поможет давать более точные ответы</p>
-      
+      <h2 data-i18n="dashboard.onboardingTitle">Давайте познакомимся</h2>
+      <p class="onboarding-subtitle" data-i18n="dashboard.onboardingSubtitle">Пара деталей поможет точнее адаптировать интерфейс и ответы.</p>
+
       <div class="onboarding-form">
-        <div class="form-group" style="margin-bottom: 16px;">
-          <label style="display: block; margin-bottom: 6px; font-weight: 500;">Как к вам обращаться? *</label>
-          <input type="text" id="onboardingName" placeholder="Ваше имя" required style="width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-component); color: var(--text-primary); font-family: inherit;">
+        <div class="form-group">
+          <label class="form-label" for="onboardingName" data-i18n="dashboard.onboardingNameLabel">Как к вам обращаться?</label>
+          <input type="text" id="onboardingName" class="input-field" data-i18n-placeholder="dashboard.onboardingNamePlaceholder" placeholder="Ваше имя">
         </div>
-        
-        <div class="form-group" style="margin-bottom: 24px;">
-          <label style="display: block; margin-bottom: 6px; font-weight: 500;">Ваш город (необязательно)</label>
-          <div class="city-chips" id="cityChips" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
-            <button class="city-chip city-btn">Алматы</button>
-            <button class="city-chip city-btn">Астана</button>
-            <button class="city-chip city-btn">Шымкент</button>
-            <button class="city-chip city-btn">Караганда</button>
-            <button class="city-chip city-btn">Актобе</button>
-            <button class="city-chip city-btn" id="otherCityBtn">Другой</button>
+
+        <div class="form-group">
+          <label class="form-label" for="onboardingOtherCity" data-i18n="dashboard.onboardingCityLabel">Ваш город</label>
+          <p class="form-hint" data-i18n="dashboard.onboardingCityHint">Это поле можно пропустить.</p>
+          <div class="city-chips" id="cityChips">
+            <button class="city-chip city-btn" data-city="almaty" type="button"></button>
+            <button class="city-chip city-btn" data-city="astana" type="button"></button>
+            <button class="city-chip city-btn" data-city="shymkent" type="button"></button>
+            <button class="city-chip city-btn" data-city="karaganda" type="button"></button>
+            <button class="city-chip city-btn" data-city="aktobe" type="button"></button>
+            <button class="city-chip city-btn" id="otherCityBtn" data-city="other" type="button"></button>
           </div>
-          <input type="text" id="onboardingOtherCity" placeholder="Введите ваш город" style="display:none; width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-component); color: var(--text-primary); font-family: inherit;">
+          <input type="text" id="onboardingOtherCity" class="input-field" data-i18n-placeholder="dashboard.onboardingOtherCityPlaceholder" placeholder="Введите ваш город">
         </div>
-        
-        <button class="btn btn-primary" id="onboardingSubmit" style="width: 100%; padding: 12px; border-radius: var(--radius-md);">Продолжить</button>
+
+        <button class="btn btn-primary onboarding-submit" id="onboardingSubmit" type="button"><span data-i18n="dashboard.onboardingSubmit">Продолжить</span></button>
       </div>
     </div>
   </div>
 
-  <script src="js/app.js"></script>
+  <footer class="footer">
+    <div class="footer-inner">
+      <span class="footer-copy" data-i18n="footer.copyright">© 2026 ZanGID. Все права защищены.</span>
+      <div class="footer-links">
+        <a href="about.html" data-i18n="footer.about">О нас</a>
+        <a href="support.html" data-i18n="footer.support">Поддержка</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/runtime.js"></script>
   <script src="js/dashboard.js"></script>
 </body>
-
 </html>

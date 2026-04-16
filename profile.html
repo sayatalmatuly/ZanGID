@@ -1,201 +1,106 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Профиль пользователя — ZanGID, AI-навигатор по законодательству Казахстана.">
+  <meta name="description" content="Профиль пользователя ZanGID.">
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg viewBox='0 0 64 78' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='32' cy='46' r='28' stroke='%231D9E75' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='46' r='2.5' fill='%231D9E75'/%3E%3C/svg%3E">
   <title>Профиль — ZanGID</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/ui.css">
   <link rel="stylesheet" href="css/profile.css">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="js/supabase.js"></script>
+  <script src="js/i18n.js"></script>
 </head>
 <body>
-
-  <!-- Навбар -->
   <nav class="navbar" id="navbar">
     <div class="navbar-inner">
-      <a href="index.html" class="navbar-logo">
-        <div class="navbar-logo-icon">
-          <svg viewBox="0 0 64 78" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="26" y="1" width="12" height="8" rx="2" stroke-width="2.5"/>
-              <line x1="27" y1="3.5" x2="37" y2="3.5" stroke-width="1.2"/>
-              <line x1="27" y1="6" x2="37" y2="6" stroke-width="1.2"/>
-              <path d="M29 9 Q29 16 32 16 Q35 16 35 9" stroke-width="2" fill="none"/>
-              <circle cx="32" cy="46" r="28" stroke-width="2.5"/>
-              <circle cx="32" cy="46" r="21" stroke-width="1.8"/>
-              <g transform="rotate(45, 32, 46)">
-                <path d="M32 32 L39 46 L32 60 L25 46 Z" stroke-width="1.8" fill="none"/>
-              </g>
-              <circle cx="32" cy="46" r="2.5" fill="currentColor" stroke="none"/>
-              <line x1="32" y1="18" x2="32" y2="25" stroke-width="2"/>
-              <line x1="32" y1="67" x2="32" y2="74" stroke-width="2"/>
-              <line x1="4" y1="46" x2="11" y2="46" stroke-width="2"/>
-              <line x1="53" y1="46" x2="60" y2="46" stroke-width="2"/>
-            </g>
-          </svg>
-        </div>
-        ZanGID
-      </a>
-
+      <a href="index.html" class="navbar-logo"><div class="navbar-logo-icon"><svg viewBox="0 0 64 78" fill="none" xmlns="http://www.w3.org/2000/svg"><g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="26" y="1" width="12" height="8" rx="2" stroke-width="2.5"/><line x1="27" y1="3.5" x2="37" y2="3.5" stroke-width="1.2"/><line x1="27" y1="6" x2="37" y2="6" stroke-width="1.2"/><path d="M29 9 Q29 16 32 16 Q35 16 35 9" stroke-width="2" fill="none"/><circle cx="32" cy="46" r="28" stroke-width="2.5"/><circle cx="32" cy="46" r="21" stroke-width="1.8"/><g transform="rotate(45, 32, 46)"><path d="M32 32 L39 46 L32 60 L25 46 Z" stroke-width="1.8" fill="none"/></g><circle cx="32" cy="46" r="2.5" fill="currentColor" stroke="none"/><line x1="32" y1="18" x2="32" y2="25" stroke-width="2"/><line x1="32" y1="67" x2="32" y2="74" stroke-width="2"/><line x1="4" y1="46" x2="11" y2="46" stroke-width="2"/><line x1="53" y1="46" x2="60" y2="46" stroke-width="2"/></g></svg></div><span>ZanGID</span></a>
       <div class="navbar-nav" id="navbarNav">
-        <a href="dashboard.html" class="navbar-link auth-user">Дашборд</a>
-        <a href="about.html" class="navbar-link">О нас</a>
-        <a href="support.html" class="navbar-link">Поддержка</a>
+        <a href="dashboard.html" class="navbar-link auth-user"><span data-i18n="nav.dashboard">Дашборд</span></a>
+        <a href="about.html" class="navbar-link"><span data-i18n="nav.about">О нас</span></a>
+        <a href="support.html" class="navbar-link"><span data-i18n="nav.support">Поддержка</span></a>
       </div>
-
       <div class="navbar-actions">
-        <a href="login.html" class="btn btn-outline auth-guest" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Войти</a>
-        <a href="chat.html" class="btn btn-primary auth-user" style="padding: 8px 16px; font-size: 0.875rem; border-radius: var(--radius-pill);">Новый чат</a>
-        <!-- Пользовательское меню -->
+        <a href="login.html" class="btn btn-outline auth-guest"><span data-i18n="nav.login">Войти</span></a>
+        <a href="chat.html" class="btn btn-primary auth-user"><span data-i18n="nav.newChat">Новый чат</span></a>
         <div class="user-menu auth-user">
-          <button class="user-menu-btn" id="userMenuBtn">
-            <div class="user-avatar user-identity-pending">…</div>
-          </button>
-          <div class="user-dropdown" id="userDropdown">
-            <div class="dropdown-header">
-              <div class="dropdown-name user-identity-pending">…</div>
-              <div class="dropdown-email user-identity-pending">…</div>
-            </div>
-            <a href="dashboard.html" class="dropdown-item">
-              <span class="dropdown-icon">📊</span> Панель управления
-            </a>
-            <a href="history.html" class="dropdown-item">
-              <span class="dropdown-icon">🕒</span> История чатов
-            </a>
-            <a href="profile.html" class="dropdown-item">
-              <span class="dropdown-icon">⚙️</span> Настройки
-            </a>
-            <div class="dropdown-divider"></div>
-            <a href="index.html" class="dropdown-item text-danger logout-btn">
-              <span class="dropdown-icon">🚪</span> Выйти
-            </a>
-          </div>
+          <button class="user-menu-btn" id="userMenuBtn" type="button"><div class="user-avatar user-identity-pending">…</div></button>
+          <div class="user-dropdown" id="userDropdown"><div class="dropdown-header"><div class="dropdown-name user-identity-pending">…</div><div class="dropdown-email user-identity-pending">…</div></div><a href="dashboard.html" class="dropdown-item"><span class="dropdown-icon">•</span><span data-i18n="dropdown.panel">Панель управления</span></a><a href="history.html" class="dropdown-item"><span class="dropdown-icon">•</span><span data-i18n="dropdown.history">История чатов</span></a><a href="profile.html" class="dropdown-item"><span class="dropdown-icon">•</span><span data-i18n="dropdown.settings">Настройки</span></a><div class="dropdown-divider"></div><a href="index.html" class="dropdown-item text-danger logout-btn"><span class="dropdown-icon">•</span><span data-i18n="dropdown.logout">Выйти</span></a></div>
         </div>
-        <button class="burger-btn" id="burgerBtn" aria-label="Меню">
-          <div class="burger-icon">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </button>
+        <button class="burger-btn" id="burgerBtn" type="button" data-i18n-aria-label="nav.menu" aria-label="Меню"><div class="burger-icon"><span></span><span></span><span></span></div></button>
       </div>
     </div>
   </nav>
 
-  <!-- Мобильное меню -->
   <div class="mobile-menu" id="mobileMenu">
-    <a href="dashboard.html" class="navbar-link auth-user">Дашборд</a>
-    <a href="about.html" class="navbar-link">О нас</a>
-    <a href="support.html" class="navbar-link">Поддержка</a>
+    <a href="dashboard.html" class="navbar-link auth-user"><span data-i18n="nav.dashboard">Дашборд</span></a>
+    <a href="about.html" class="navbar-link"><span data-i18n="nav.about">О нас</span></a>
+    <a href="support.html" class="navbar-link"><span data-i18n="nav.support">Поддержка</span></a>
   </div>
 
-  <!-- Шапка профиля -->
   <section class="profile-header">
-    <h1>Мой профиль</h1>
-    <p>Управляйте настройками аккаунта</p>
+    <div class="profile-header-inner">
+      <div class="eyebrow"><span data-i18n="dropdown.settings">Настройки</span></div>
+      <h1 data-i18n="profile.title">Мой профиль</h1>
+      <p data-i18n="profile.subtitle">Настройки языка, интерфейса и персональных данных для повседневной работы.</p>
+    </div>
   </section>
 
-  <!-- Контент профиля -->
   <div class="profile-content">
-
-    <!-- Карточка пользователя -->
     <div class="profile-card">
       <div class="profile-avatar user-identity-pending" id="profileAvatar">…</div>
       <div class="profile-info">
         <h2 id="profileName" class="user-identity-pending">…</h2>
         <p id="profileCity" class="user-identity-pending">…</p>
         <div class="profile-stats">
-          <div class="profile-stat">
-            <span class="profile-stat-value user-identity-pending" id="statQueries">…</span>
-            запросов
-          </div>
-          <div class="profile-stat">
-            <span class="profile-stat-value user-identity-pending" id="statTopics">…</span>
-            сообщений
-          </div>
+          <div class="profile-stat"><span class="profile-stat-value user-identity-pending" id="statQueries">…</span><span data-i18n="profile.statQueries">чатов</span></div>
+          <div class="profile-stat"><span class="profile-stat-value user-identity-pending" id="statTopics">…</span><span data-i18n="profile.statMessages">сообщений</span></div>
         </div>
       </div>
     </div>
 
-    <!-- Настройки — Общие -->
-    <div class="settings-section">
-      <div class="settings-title">Общие настройки</div>
-
+    <section class="settings-section">
+      <div class="settings-title" data-i18n="profile.generalTitle">Общие настройки</div>
       <div class="settings-item">
-        <div class="settings-item-label">
-          <span>Город</span>
-          <span>Для персонализации результатов</span>
-        </div>
-        <!-- TODO: Supabase - сохранить настройки профиля -->
+        <div class="settings-item-label"><span data-i18n="profile.cityLabel">Город</span><span data-i18n="profile.cityHint">Используется для персонализации сценариев и подсказок.</span></div>
         <select class="settings-select" id="settingCity">
-          <option value="almaty" selected>Алматы</option>
-          <option value="astana">Астана</option>
-          <option value="shymkent">Шымкент</option>
-          <option value="karaganda">Караганда</option>
-          <option value="atyrau">Атырау</option>
-          <option value="aktobe">Актобе</option>
-          <option value="pavlodar">Павлодар</option>
-          <option value="other">Другой</option>
+          <option value="" data-i18n="profile.citySelectPlaceholder">Не указан</option>
+          <option value="almaty"></option>
+          <option value="astana"></option>
+          <option value="shymkent"></option>
+          <option value="karaganda"></option>
+          <option value="atyrau"></option>
+          <option value="aktobe"></option>
+          <option value="pavlodar"></option>
+          <option value="other"></option>
         </select>
       </div>
-
       <div class="settings-item">
-        <div class="settings-item-label">
-          <span>Язык</span>
-          <span>Язык интерфейса и ответов</span>
-        </div>
-        <select class="settings-select" id="settingLanguage">
-          <option value="ru" selected>Русский</option>
-          <option value="kz">Қазақша</option>
-        </select>
+        <div class="settings-item-label"><span data-i18n="profile.languageLabel">Язык</span><span data-i18n="profile.languageHint">Основной язык интерфейса ZanGID.</span></div>
+        <select class="settings-select" id="settingLanguage"><option value="ru">Русский</option><option value="kz">Қазақша</option></select>
       </div>
-    </div>
+    </section>
 
-    <!-- Настройки — Уведомления и тема -->
-    <div class="settings-section">
-      <div class="settings-title">Интерфейс</div>
-
+    <section class="settings-section">
+      <div class="settings-title" data-i18n="profile.interfaceTitle">Интерфейс</div>
       <div class="settings-item">
-        <div class="settings-item-label">
-          <span>Уведомления</span>
-          <span>Получать обновления о новых законах</span>
-        </div>
-        <div class="toggle" id="toggleNotifications">
-          <div class="toggle-knob"></div>
-        </div>
+        <div class="settings-item-label"><span data-i18n="profile.notificationsLabel">Уведомления</span><span data-i18n="profile.notificationsHint">Напоминания об обновлениях сервиса и статусов.</span></div>
+        <div class="toggle" id="toggleNotifications"><div class="toggle-knob"></div></div>
       </div>
-
       <div class="settings-item">
-        <div class="settings-item-label">
-          <span>Тёмная тема</span>
-          <span>Переключить тёмный режим интерфейса</span>
-        </div>
-        <div class="toggle" id="toggleTheme">
-          <div class="toggle-knob"></div>
-        </div>
+        <div class="settings-item-label"><span data-i18n="profile.themeLabel">Тёмная тема</span><span data-i18n="profile.themeHint">Синхронизируется со всеми страницами приложения.</span></div>
+        <div class="toggle" id="toggleTheme"><div class="toggle-knob"></div></div>
       </div>
-    </div>
+    </section>
 
-    <!-- Кнопка выхода -->
-    <button class="logout-btn" id="logoutBtn">Выйти из аккаунта</button>
-
+    <button class="logout-btn" id="logoutBtn" type="button" data-i18n="profile.logout">Выйти из аккаунта</button>
   </div>
 
-  <!-- Футер -->
-  <footer class="footer">
-    <div class="footer-inner">
-      <span class="footer-copy">© 2026 ZanGID. Все права защищены.</span>
-      <div class="footer-links">
-        <a href="about.html">О нас</a>
-        <a href="support.html">Поддержка</a>
-      </div>
-    </div>
-  </footer>
+  <footer class="footer"><div class="footer-inner"><span class="footer-copy" data-i18n="footer.copyright">© 2026 ZanGID. Все права защищены.</span><div class="footer-links"><a href="about.html" data-i18n="footer.about">О нас</a><a href="support.html" data-i18n="footer.support">Поддержка</a></div></div></footer>
 
-  <script src="js/app.js"></script>
+  <script src="js/runtime.js"></script>
   <script src="js/profile.js"></script>
 </body>
 </html>
