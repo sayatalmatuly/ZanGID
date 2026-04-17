@@ -18,7 +18,9 @@
 
     var backendUrl = typeof window.ZANGID_API_BASE === 'string' && window.ZANGID_API_BASE
       ? window.ZANGID_API_BASE
-      : 'http://127.0.0.1:8000';
+      : 'http://127.0.0.1:8000'
+    'https://zangid-production.up.railway.app';
+
 
     var CHAT_TITLE_PATH = '/api/chat-title';
 
@@ -216,9 +218,9 @@
         var item = document.createElement('div');
         item.className = 'sidebar-item' + (currentChatId === chat.id ? ' active' : '');
         item.dataset.chatId = chat.id;
-        
+
         var title = chat.title || getUntitledChatTitle();
-        
+
         item.innerHTML =
           '<div class="sidebar-item-icon">ZG</div>' +
           '<div class="sidebar-item-body">' +
@@ -265,14 +267,14 @@
 
     function handleRenameStart(item, chatId, currentTitle) {
       if (item.classList.contains('editing')) return;
-      
+
       item.classList.add('editing');
       var titleEl = item.querySelector('.sidebar-item-text');
       var input = document.createElement('input');
       input.type = 'text';
       input.className = 'sidebar-rename-input';
       input.value = currentTitle;
-      
+
       titleEl.innerHTML = '';
       titleEl.appendChild(input);
       input.focus();
@@ -324,7 +326,7 @@
 
       try {
         console.log('[Delete] Начало удаления чата:', chatId);
-        
+
         // Шаг 1: Удаляем связанные сообщения
         var msgResponse = await window.supabaseClient
           .from('messages')
@@ -361,14 +363,14 @@
 
         // Обновляем локальное состояние
         chatsCache = chatsCache.filter(function (c) { return c.id !== chatId; });
-        
+
         if (currentChatId === chatId) {
           currentChatId = null;
           messagesCache = [];
           setCurrentTitle(getUntitledChatTitle());
           renderEmptyChat();
         }
-        
+
         renderSidebarList();
         window.ZanGid.showToast('success', t('common.done'));
         console.log('[Delete] Чат успешно удален полностью.');
@@ -866,7 +868,7 @@
       card.appendChild(bubble);
       message.appendChild(avatar);
       message.appendChild(card);
-      
+
       // Typing indicator также вставляем в начало DOM (визуально в самый низ)
       chatMessages.prepend(message);
       return message;
