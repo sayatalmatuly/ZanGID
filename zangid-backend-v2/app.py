@@ -61,6 +61,8 @@ def health():
 
 @app.route("/api/chat", methods=["POST", "OPTIONS"])
 def chat():
+    if request.method == "OPTIONS":
+        return jsonify({"ok": True}), 200
     """
     Основной endpoint чата.
 
