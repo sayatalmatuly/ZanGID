@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   'use strict';
 
   document.addEventListener('DOMContentLoaded', async function () {
@@ -16,8 +16,12 @@
     var chatsCache = [];
     var messagesCache = [];
 
-    var backendUrl = typeof window.ZANGID_API_BASE === 'string' ? window.ZANGID_API_BASE : '';
+    var backendUrl = typeof window.ZANGID_API_BASE === 'string' && window.ZANGID_API_BASE
+      ? window.ZANGID_API_BASE
+      : 'http://127.0.0.1:8000';
+
     var CHAT_TITLE_PATH = '/api/chat-title';
+
 
     var chatInput = document.getElementById('chatInput');
     var chatSendBtn = document.getElementById('chatSendBtn');
@@ -27,6 +31,8 @@
     var sidebarToggle = document.getElementById('sidebarToggle');
     var chatSidebar = document.getElementById('chatSidebar');
     var sidebarList = document.getElementById('sidebarList');
+    var sidebarSearch = document.getElementById('sidebarSearch');
+    var sidebarSearchQuery = '';
 
     function t(key, vars) {
       return window.ZanGid.t(key, vars);
@@ -189,31 +195,187 @@
     function renderSidebarList() {
       sidebarList.innerHTML = renderSidebarLabel();
 
-      if (!chatsCache.length) {
-        renderSidebarState('empty', t('chat.sidebarEmptyTitle'), t('chat.sidebarEmptyText'));
+      var filteredChats = chatsCache;
+      if (sidebarSearchQuery) {
+        var query = sidebarSearchQuery.toLowerCase();
+        filteredChats = chatsCache.filter(function (chat) {
+          return (chat.title || '').toLowerCase().indexOf(query) !== -1;
+        });
+      }
+
+      if (!filteredChats.length) {
+        if (sidebarSearchQuery) {
+          renderSidebarState('info', t('chat.noSearchResultsTitle') || 'Ничего не найдено', t('chat.noSearchResultsText') || 'Попробуйте другой запрос');
+        } else {
+          renderSidebarState('empty', t('chat.sidebarEmptyTitle'), t('chat.sidebarEmptyText'));
+        }
         return;
       }
 
-      chatsCache.forEach(function (chat) {
+      filteredChats.forEach(function (chat) {
         var item = document.createElement('div');
         item.className = 'sidebar-item' + (currentChatId === chat.id ? ' active' : '');
         item.dataset.chatId = chat.id;
+        
+        var title = chat.title || getUntitledChatTitle();
+        
         item.innerHTML =
           '<div class="sidebar-item-icon">ZG</div>' +
           '<div class="sidebar-item-body">' +
-            '<span class="sidebar-item-text"></span>' +
-            '<span class="sidebar-item-meta"></span>' +
+          '<span class="sidebar-item-text"></span>' +
+          '<span class="sidebar-item-meta"></span>' +
+          '</div>' +
+          '<div class="sidebar-item-actions">' +
+          '<button class="sidebar-action-btn rename" title="' + t('chat.rename') + '">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>' +
+          '</button>' +
+          '<button class="sidebar-action-btn delete" title="' + t('chat.delete') + '">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>' +
+          '</button>' +
           '</div>';
-        item.querySelector('.sidebar-item-text').textContent = chat.title || getUntitledChatTitle();
+
+        var titleEl = item.querySelector('.sidebar-item-text');
+        titleEl.textContent = title;
         item.querySelector('.sidebar-item-meta').textContent = window.ZanGid.formatDate(chat.created_at, {
           day: 'numeric',
           month: 'short'
         });
-        item.addEventListener('click', function () {
-          loadChatMessages(chat.id, chat.title);
+
+        item.addEventListener('click', function (e) {
+          if (!item.classList.contains('editing')) {
+            loadChatMessages(chat.id, chat.title);
+          }
         });
+
+        var renameBtn = item.querySelector('.sidebar-action-btn.rename');
+        renameBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          handleRenameStart(item, chat.id, title);
+        });
+
+        var deleteBtn = item.querySelector('.sidebar-action-btn.delete');
+        deleteBtn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          handleDeleteChat(chat.id);
+        });
+
         sidebarList.appendChild(item);
       });
+    }
+
+    function handleRenameStart(item, chatId, currentTitle) {
+      if (item.classList.contains('editing')) return;
+      
+      item.classList.add('editing');
+      var titleEl = item.querySelector('.sidebar-item-text');
+      var input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'sidebar-rename-input';
+      input.value = currentTitle;
+      
+      titleEl.innerHTML = '';
+      titleEl.appendChild(input);
+      input.focus();
+      input.select();
+
+      function finish() {
+        var newTitle = input.value.trim();
+        if (newTitle && newTitle !== currentTitle) {
+          saveChatRename(chatId, newTitle);
+        } else {
+          renderSidebarList();
+        }
+      }
+
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') finish();
+        if (e.key === 'Escape') renderSidebarList();
+      });
+
+      input.addEventListener('blur', finish);
+    }
+
+    async function saveChatRename(chatId, newTitle) {
+      try {
+        var response = await window.supabaseClient
+          .from('chats')
+          .update({ title: newTitle })
+          .eq('id', chatId);
+
+        if (response.error) throw response.error;
+
+        updateChatCacheTitle(chatId, newTitle);
+        if (currentChatId === chatId) {
+          setCurrentTitle(newTitle);
+        }
+        renderSidebarList();
+      } catch (error) {
+        console.error('Ошибка переименования чата:', error);
+        window.ZanGid.showToast('error', t('chat.systemError'));
+        renderSidebarList();
+      }
+    }
+
+    async function handleDeleteChat(chatId) {
+      var confirmed = await window.ZanGid.confirm({
+        text: t('chat.deleteConfirm')
+      });
+      if (!confirmed) return;
+
+      try {
+        console.log('[Delete] Начало удаления чата:', chatId);
+        
+        // Шаг 1: Удаляем связанные сообщения
+        var msgResponse = await window.supabaseClient
+          .from('messages')
+          .delete()
+          .eq('chat_id', chatId);
+
+        if (msgResponse.error) {
+          console.error('[Delete] Ошибка при удалении сообщений:', {
+            message: msgResponse.error.message,
+            code: msgResponse.error.code,
+            details: msgResponse.error.details,
+            hint: msgResponse.error.hint
+          });
+          throw new Error('Messages deletion failed: ' + msgResponse.error.message);
+        }
+
+        console.log('[Delete] Сообщения удалены. Шаг 2: Удаление чата.');
+
+        // Шаг 2: Удаляем сам чат
+        var chatResponse = await window.supabaseClient
+          .from('chats')
+          .delete()
+          .eq('id', chatId);
+
+        if (chatResponse.error) {
+          console.error('[Delete] Ошибка при удалении записи чата:', {
+            message: chatResponse.error.message,
+            code: chatResponse.error.code,
+            details: chatResponse.error.details,
+            hint: chatResponse.error.hint
+          });
+          throw new Error('Chat entry deletion failed: ' + chatResponse.error.message);
+        }
+
+        // Обновляем локальное состояние
+        chatsCache = chatsCache.filter(function (c) { return c.id !== chatId; });
+        
+        if (currentChatId === chatId) {
+          currentChatId = null;
+          messagesCache = [];
+          setCurrentTitle(getUntitledChatTitle());
+          renderEmptyChat();
+        }
+        
+        renderSidebarList();
+        window.ZanGid.showToast('success', t('common.done'));
+        console.log('[Delete] Чат успешно удален полностью.');
+      } catch (error) {
+        console.error('[Delete] Итоговая ошибка процесса:', error);
+        window.ZanGid.showToast('error', t('chat.systemError'));
+      }
     }
 
     async function loadChats() {
@@ -587,14 +749,16 @@
       }
 
       chatMessages.innerHTML = '';
+      // Рендерим в порядке возрастания времени, используя prepend. 
+      // Каждый следующий элемент будет вставляться ПЕРЕД предыдущим в DOM, 
+      // что при column-reverse означает — он будет НИЖЕ визуально.
       messagesCache.forEach(function (message) {
-        chatMessages.appendChild(createMessageElement(message.role, message.content));
+        chatMessages.prepend(createMessageElement(message.role, message.content));
       });
-      scrollToBottom();
     }
 
     function appendMessage(role, content, pushToCache) {
-      chatMessages.appendChild(createMessageElement(role, content));
+      chatMessages.prepend(createMessageElement(role, content));
       if (pushToCache !== false) {
         messagesCache.push({ role: role, content: content });
       }
@@ -702,9 +866,9 @@
       card.appendChild(bubble);
       message.appendChild(avatar);
       message.appendChild(card);
-      chatMessages.appendChild(message);
-
-      scrollToBottom();
+      
+      // Typing indicator также вставляем в начало DOM (визуально в самый низ)
+      chatMessages.prepend(message);
       return message;
     }
 
@@ -742,7 +906,6 @@
       appendMessage('user', text);
       chatInput.value = '';
       autoResizeTextarea();
-      scrollToBottom();
 
       var typingIndicator = showTypingIndicator();
       var titleJobChatId = null;
@@ -859,6 +1022,13 @@
         });
         renderEmptyChat();
         closeSidebarOnMobile();
+      });
+    }
+
+    if (sidebarSearch) {
+      sidebarSearch.addEventListener('input', function () {
+        sidebarSearchQuery = sidebarSearch.value.trim();
+        renderSidebarList();
       });
     }
 

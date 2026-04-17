@@ -64,6 +64,13 @@
     <section class="settings-section">
       <div class="settings-title" data-i18n="profile.generalTitle">Общие настройки</div>
       <div class="settings-item">
+        <div class="settings-item-label"><span data-i18n="profile.nameLabel">Имя</span><span data-i18n="profile.nameHint">Используется в профиле, приветствии и меню аккаунта.</span></div>
+        <div class="settings-control-group">
+          <input type="text" class="settings-input" id="settingName" data-i18n-placeholder="profile.namePlaceholder" placeholder="Ваше имя">
+          <button class="btn btn-secondary settings-save-btn" id="saveNameBtn" type="button" data-i18n="profile.saveName">Сохранить</button>
+        </div>
+      </div>
+      <div class="settings-item">
         <div class="settings-item-label"><span data-i18n="profile.cityLabel">Город</span><span data-i18n="profile.cityHint">Используется для персонализации сценариев и подсказок.</span></div>
         <select class="settings-select" id="settingCity">
           <option value="" data-i18n="profile.citySelectPlaceholder">Не указан</option>

@@ -9,6 +9,7 @@
       common: {
         locale: 'ru-RU',
         brand: 'ZanGID',
+        done: 'Успех',
         languageRu: 'RU',
         languageKz: 'KZ',
         switchLanguage: 'Переключить язык',
@@ -20,8 +21,12 @@
         saving: 'Сохранение...',
         sending: 'Отправка...',
         submit: 'Отправить',
-        continue: 'Продолжить',
+        confirm: 'Подтвердить',
         cancel: 'Отмена',
+        ok: 'ОК',
+        yes: 'Да',
+        no: 'Нет',
+        continue: 'Продолжить',
         retry: 'Повторить',
         open: 'Открыть',
         close: 'Закрыть',
@@ -179,7 +184,12 @@
         systemError: 'Не удалось получить ответ. Попробуйте отправить запрос ещё раз.',
         titleCreated: 'Новый чат создан',
         titleFallbackPrefix: 'Вопрос',
-        sourceFallback: 'Источник'
+        sourceFallback: 'Источник',
+        rename: 'Переименовать',
+        renamePlaceholder: 'Название чата...',
+        searchPlaceholder: 'Поиск по чатам',
+        delete: 'Удалить',
+        deleteConfirm: 'Удалить этот чат и всю историю сообщений?'
       },
       dashboard: {
         subtitle: 'Продолжайте работу с запросами, следите за активностью и быстро возвращайтесь к важным диалогам.',
@@ -238,6 +248,11 @@
       profile: {
         title: 'Мой профиль',
         subtitle: 'Настройки языка, интерфейса и персональных данных для повседневной работы.',
+        nameLabel: 'Имя',
+        nameHint: 'Используется в профиле, приветствии и меню аккаунта.',
+        namePlaceholder: 'Ваше имя',
+        saveName: 'Сохранить',
+        nameRequired: 'Пожалуйста, введите имя.',
         cityPlaceholder: 'Город не указан',
         statQueries: 'чатов',
         statMessages: 'сообщений',
@@ -341,6 +356,7 @@
       common: {
         locale: 'kk-KZ',
         brand: 'ZanGID',
+        done: 'Сәтті',
         languageRu: 'RU',
         languageKz: 'KZ',
         switchLanguage: 'Тілді ауыстыру',
@@ -352,6 +368,11 @@
         saving: 'Сақталуда...',
         sending: 'Жіберілуде...',
         submit: 'Жіберу',
+        confirm: 'Растау',
+        cancel: 'Бас тарту',
+        ok: 'ОК',
+        yes: 'Иә',
+        no: 'Жоқ',
         continue: 'Жалғастыру',
         cancel: 'Бас тарту',
         retry: 'Қайталау',
@@ -511,7 +532,12 @@
         systemError: 'Жауапты алу мүмкін болмады. Қайта жіберіп көріңіз.',
         titleCreated: 'Жаңа чат құрылды',
         titleFallbackPrefix: 'Сұрақ',
-        sourceFallback: 'Дереккөз'
+        sourceFallback: 'Дереккөз',
+        rename: 'Атын өзгерту',
+        renamePlaceholder: 'Чат атауы...',
+        searchPlaceholder: 'Чаттарды іздеу',
+        delete: 'Өшіру',
+        deleteConfirm: 'Бұл чатты және барлық хабарламалар тарихын өшіру керек пе?'
       },
       dashboard: {
         subtitle: 'Сұраныстарды жалғастырыңыз, белсенділікті бақылаңыз және маңызды диалогтарға тез оралыңыз.',
@@ -570,6 +596,11 @@
       profile: {
         title: 'Менің профилім',
         subtitle: 'Күнделікті жұмысқа арналған тіл, интерфейс және жеке деректер баптаулары.',
+        nameLabel: 'Аты',
+        nameHint: 'Профильде, қарсы алу мәтінінде және аккаунт мәзірінде көрсетіледі.',
+        namePlaceholder: 'Атыңыз',
+        saveName: 'Сақтау',
+        nameRequired: 'Атыңызды енгізіңіз.',
         cityPlaceholder: 'Қала көрсетілмеген',
         statQueries: 'чат',
         statMessages: 'хабарлама',

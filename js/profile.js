@@ -12,10 +12,13 @@
 
     var toggleThemeEl = document.getElementById('toggleTheme');
     var toggleNotifications = document.getElementById('toggleNotifications');
+    var settingName = document.getElementById('settingName');
+    var saveNameBtn = document.getElementById('saveNameBtn');
     var settingCity = document.getElementById('settingCity');
     var settingLanguage = document.getElementById('settingLanguage');
     var presetCityKeys = ['almaty', 'astana', 'shymkent', 'karaganda', 'atyrau', 'aktobe', 'pavlodar'];
     var customCityValue = '';
+    var currentName = '';
 
     var profileName = document.getElementById('profileName');
     var profileAvatar = document.getElementById('profileAvatar');
@@ -29,6 +32,34 @@
 
     function isPresetCityKey(value) {
       return presetCityKeys.indexOf(String(value || '')) !== -1;
+    }
+
+    function getNameValue() {
+      return String(settingName.value || '').trim();
+    }
+
+    function syncNameDisplay(value) {
+      var name = String(value || '').trim() || user.email.split('@')[0];
+      currentName = name;
+
+      profileName.textContent = name;
+      profileName.classList.remove('user-identity-pending');
+
+      profileAvatar.textContent = window.ZanGid.getInitials(name);
+      profileAvatar.classList.remove('user-identity-pending');
+
+      if (settingName && document.activeElement !== settingName) {
+        settingName.value = name;
+      }
+
+      document.querySelectorAll('.dropdown-name').forEach(function (node) {
+        node.textContent = name;
+        node.classList.remove('user-identity-pending');
+      });
+      document.querySelectorAll('.user-avatar').forEach(function (node) {
+        node.textContent = window.ZanGid.getInitials(name);
+        node.classList.remove('user-identity-pending');
+      });
     }
 
     function renderCityOptions() {
@@ -73,23 +104,45 @@
       return selectedValue;
     }
 
-    async function saveProfile() {
+    async function saveProfile(options) {
+      var settings = options || {};
       try {
+        var nextName = getNameValue() || currentName;
+        if (!nextName) {
+          window.ZanGid.showToast(t('profile.nameRequired'), 'info');
+          return false;
+        }
+
+        if (saveNameBtn && settings.lockNameButton) {
+          saveNameBtn.disabled = true;
+          saveNameBtn.textContent = t('common.saving');
+        }
+
         var storedCity = getPersistedCityValue();
         var response = await window.supabaseClient.from('users').upsert({
           id: user.id,
-          name: profileName.textContent,
+          name: nextName,
           city: storedCity,
           language: settingLanguage.value,
           updated_at: new Date().toISOString()
         }, { onConflict: 'id' });
         if (response.error) throw response.error;
 
+        syncNameDisplay(nextName);
         syncProfileCityDisplay(storedCity || '');
-        window.ZanGid.showToast(t('profile.saveSuccess'), 'success');
+        if (settings.showToast !== false) {
+          window.ZanGid.showToast(t('profile.saveSuccess'), 'success');
+        }
+        return true;
       } catch (error) {
         console.error('Ошибка сохранения профиля:', error);
         window.ZanGid.showToast(t('profile.saveError'), 'error');
+        return false;
+      } finally {
+        if (saveNameBtn) {
+          saveNameBtn.disabled = false;
+          saveNameBtn.textContent = t('profile.saveName');
+        }
       }
     }
 
@@ -98,7 +151,11 @@
       if (!settingLanguage.matches(':focus')) {
         settingLanguage.value = window.ZanGid.getLanguage();
       }
+      if (saveNameBtn) {
+        saveNameBtn.textContent = t('profile.saveName');
+      }
       syncProfileCityDisplay(profileCity.dataset.cityKey || profileCity.dataset.cityCustom || '');
+      syncNameDisplay(currentName);
     });
 
     renderCityOptions();
@@ -113,11 +170,7 @@
 
       var profile = profileResponse.data || null;
       var fullName = (profile && profile.name) || user.user_metadata?.fullname || user.email.split('@')[0];
-      profileName.textContent = fullName;
-      profileName.classList.remove('user-identity-pending');
-
-      profileAvatar.textContent = window.ZanGid.getInitials(fullName);
-      profileAvatar.classList.remove('user-identity-pending');
+      syncNameDisplay(fullName);
 
       if (profile && profile.city) {
         if (isPresetCityKey(profile.city)) {
@@ -152,10 +205,7 @@
       statTopics.classList.remove('user-identity-pending');
     } catch (error) {
       console.error('Ошибка профиля:', error);
-      profileName.textContent = user.email.split('@')[0];
-      profileName.classList.remove('user-identity-pending');
-      profileAvatar.textContent = window.ZanGid.getInitials(user.email.split('@')[0]);
-      profileAvatar.classList.remove('user-identity-pending');
+      syncNameDisplay(user.email.split('@')[0]);
       profileCity.textContent = t('profile.cityPlaceholder');
       profileCity.classList.remove('user-identity-pending');
       statQueries.textContent = '—';
@@ -172,6 +222,22 @@
       syncProfileCityDisplay(getPersistedCityValue() || '');
       saveProfile();
     });
+
+    if (saveNameBtn) {
+      saveNameBtn.addEventListener('click', function () {
+        saveProfile({ lockNameButton: true });
+      });
+    }
+
+    if (settingName) {
+      settingName.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          saveProfile({ lockNameButton: true });
+        }
+      });
+    }
+
     settingLanguage.addEventListener('change', function () {
       window.ZanGid.setLanguage(settingLanguage.value);
       saveProfile();

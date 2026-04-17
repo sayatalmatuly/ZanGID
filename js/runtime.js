@@ -321,6 +321,48 @@
     });
   }
 
+  function confirmModal(options) {
+    return new Promise(function (resolve) {
+      var settings = options || {};
+      var title = settings.title || translate('common.confirm');
+      var message = settings.text || '';
+      var confirmLabel = settings.confirmLabel || translate('common.ok');
+      var cancelLabel = settings.cancelLabel || translate('common.cancel');
+
+      var overlay = document.createElement('div');
+      overlay.className = 'modal-overlay';
+      overlay.innerHTML =
+        '<div class="modal-card">' +
+          '<div class="modal-title">' + title + '</div>' +
+          '<div class="modal-text">' + message + '</div>' +
+          '<div class="modal-actions">' +
+            '<button type="button" class="modal-btn modal-btn-cancel">' + cancelLabel + '</button>' +
+            '<button type="button" class="modal-btn modal-btn-confirm">' + confirmLabel + '</button>' +
+          '</div>' +
+        '</div>';
+
+      document.body.appendChild(overlay);
+
+      function close(result) {
+        overlay.classList.add('hiding');
+        setTimeout(function () {
+          if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+          resolve(result);
+        }, 240);
+        document.removeEventListener('keydown', handleKey);
+      }
+
+      function handleKey(e) {
+        if (e.key === 'Escape') close(false);
+        if (e.key === 'Enter') close(true);
+      }
+
+      overlay.querySelector('.modal-btn-cancel').addEventListener('click', function () { close(false); });
+      overlay.querySelector('.modal-btn-confirm').addEventListener('click', function () { close(true); });
+      document.addEventListener('keydown', handleKey);
+    });
+  }
+
   function createStateMarkup(options) {
     var settings = options || {};
     var classes = ['state-card'];
@@ -481,6 +523,7 @@
     createStateMarkup: createStateMarkup,
     renderState: renderState,
     createSkeletonMarkup: createSkeletonMarkup,
+    confirm: confirmModal,
     closeMobileMenu: closeMobileMenu
   };
   window.showToast = showToast;

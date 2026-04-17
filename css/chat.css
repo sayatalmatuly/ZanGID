@@ -1,36 +1,89 @@
-﻿.chat-page {
-  overflow: hidden;
+.chat-page,
+html {
+  overflow: hidden !important;
+  height: 100% !important;
+  height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+}
+
+body.chat-page {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.navbar {
+  flex: 0 0 auto !important;
+  z-index: 100;
 }
 
 .chat-layout {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
   display: grid;
   grid-template-columns: 310px minmax(0, 1fr);
-  height: calc(100vh - 72px);
-  min-height: calc(100vh - 72px);
+  overflow: hidden;
+  position: relative;
 }
 
 .chat-sidebar {
-  background: var(--bg-elevated);
+  display: flex !important;
+  flex-direction: column !important;
   border-right: 1px solid var(--border-color);
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
+  background: var(--bg-elevated);
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .sidebar-header {
-  padding: 18px;
-  border-bottom: 1px solid var(--border-color);
+  padding: 24px 20px 14px;
+  flex-shrink: 0;
 }
 
-.sidebar-header .btn {
+.sidebar-search {
+  padding: 0 20px 18px;
+  flex-shrink: 0;
+}
+
+.sidebar-search-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar-search-inner svg {
+  position: absolute;
+  left: 14px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.sidebar-search-inner input {
   width: 100%;
-  justify-content: flex-start;
+  padding: 11px 14px 11px 40px;
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.sidebar-search-inner input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-elevated);
+  box-shadow: 0 0 0 3px rgba(29, 143, 106, 0.1);
 }
 
 .sidebar-list {
   flex: 1;
   padding: 16px 12px 18px;
   overflow-y: auto;
+  min-height: 0;
 }
 
 .sidebar-label {
@@ -82,6 +135,66 @@
 }
 
 .sidebar-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-item-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  margin-left: 8px;
+  align-self: center;
+}
+
+.sidebar-item:hover .sidebar-item-actions {
+  opacity: 1;
+}
+
+.sidebar-action-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  background: transparent;
+  transition: all 0.2s ease;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar-action-btn:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.sidebar-action-btn.delete:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.sidebar-rename-input {
+  width: 100%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  padding: 2px 6px;
+  margin: -3px -7px;
+}
+
+.sidebar-rename-input:focus {
+  outline: none;
+}
+
+.sidebar-item-body {
   min-width: 0;
 }
 
@@ -103,12 +216,16 @@
 
 .chat-main {
   min-width: 0;
-  display: flex;
-  flex-direction: column;
+  min-height: 0;
+  display: flex !important;
+  flex-direction: column !important;
   background: transparent;
+  overflow: hidden; /* Важно: сам контейнер не скроллится */
+  height: 100%;
 }
 
 .chat-header {
+  flex-shrink: 0;
   padding: 22px 28px 18px;
   border-bottom: 1px solid var(--border-color);
   background: rgba(var(--bg-primary-rgb), 0.78);
@@ -158,12 +275,16 @@
 }
 
 .chat-messages {
-  flex: 1;
-  overflow-y: auto;
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
   padding: 28px;
   display: flex;
-  flex-direction: column;
+  flex-direction: column-reverse; /* Сообщения идут снизу вверх */
   gap: 18px;
+  padding-bottom: 40px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 }
 
 .chat-empty {
@@ -459,6 +580,7 @@
 }
 
 .chat-input-area {
+  flex-shrink: 0;
   padding: 18px 28px 22px;
   border-top: 1px solid var(--border-color);
   background: rgba(var(--bg-primary-rgb), 0.9);
@@ -539,6 +661,8 @@
 @media (max-width: 880px) {
   .chat-layout {
     grid-template-columns: minmax(0, 1fr);
+    /* Убираем жесткие высоты, полагаемся на flex: 1 от body */
+    min-height: 0;
   }
 
   .chat-sidebar {
