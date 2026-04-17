@@ -18,8 +18,9 @@
 
     var backendUrl = typeof window.ZANGID_API_BASE === 'string' && window.ZANGID_API_BASE
       ? window.ZANGID_API_BASE
-      : 'http://127.0.0.1:8000'
-    'https://zangid-production.up.railway.app';
+      : (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+        ? 'http://127.0.0.1:8000'
+        : 'https://zangid-production.up.railway.app');
 
 
     var CHAT_TITLE_PATH = '/api/chat-title';
