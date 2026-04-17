@@ -59,7 +59,7 @@ def health():
     return jsonify({"ok": True})
 
 
-@app.route("/api/chat", methods=["POST"])
+@app.route("/api/chat", methods=["POST", "OPTIONS"])
 def chat():
     """
     Основной endpoint чата.
@@ -125,7 +125,7 @@ def chat():
         )
 
 
-@app.route("/api/chat-title", methods=["POST"])
+@app.route("/api/chat-title", methods=["POST", "OPTIONS"])
 def chat_title():
     """
     Генерация названия чата.
